@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Analyse de musique {% endblock %}</h1>
+<a>Connecter vous avec vos identifiants Spotify pour analyser vos playlists</a>
+<br>
+<br>
+<form method="POST" >
+    <div class="form-group">
+        <label for="identifiant">Identifiant</label>
+        <input type="email" name="identifiant"
+               placeholder="xx@xx.xx" class="form-control"
+               value="{{ request.form['identifiant'] }}"></input>
+    </div>
+
+    <div class="form-group">
+        <label for="secret"> Mot de passe </label>
+        <input type="password" name="secret" placeholder="Password"
+                  class="form-control">{{ request.form['secret'] }}</input>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Analysons !</button>
+    </div>
+</form>
+{% endblock %}
