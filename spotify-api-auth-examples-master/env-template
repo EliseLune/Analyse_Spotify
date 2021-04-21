@@ -1,0 +1,7 @@
+# Spotify-Flask Example App
+FLASK_APP=app.py
+FLASK_ENV=development
+CLIENT_ID=1344579488b94b5690228b09751fefe5
+CLIENT_SECRET=a049d54e046d48d1a16d73250f733117
+REDIRECT_URI=http://127.0.0.1:5000/callback
+SECRET_KEY=XXX #Use output of python -c 'import os; print(os.urandom(16))'

@@ -1,0 +1,6 @@
+Dans la console, écrire
+export FLASK_APP=app
+export FLASK_ENV=development (plus besoin en fait c'est dans le code maintenant)
+flask run (ou 'python -m flask run' si ça ne marche pas)
+
+Une petite remarque : il faut que la playlist soit publique

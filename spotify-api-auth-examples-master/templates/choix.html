@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Choix de la playlist {% endblock %}</h1>
+    <br>
+    {% for (playlist,nom) in playlists %}
+        <a href="{{ url_for('analyse', playlist_id=playlist) }}">
+            <p>{{ nom }}</p>
+        </a>
+        
+
+        <hr>
+    {% endfor %}
+{% endblock %}
