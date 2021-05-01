@@ -93,7 +93,7 @@ def login(loginout):
     )
 
     # Request authorization from user
-    scope = 'user-read-private user-read-email'
+    scope = 'user-read-private user-read-email playlist-read-private'
 
     if loginout == 'logout':
         payload = {
