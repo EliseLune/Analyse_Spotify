@@ -1,0 +1,13 @@
+audio-features,name,description,average,tag,min,max,median,st dev
+acousticness,Acoustique,Décrit dans quelle proportion la piste est produite par des instruments acoustiques. 0 = électro | 1 = Vivaldi,0.09047308974358977,Synthétique,7.95e-05,0.622,0.0426,0.1204827938664552
+danceability,Dansabilité,Décrit à quel point il est possible de danser sur la piste. 0 = émission radio | 1 = musique de boîte,0.6635641025641024,Très dansant,0.279,0.912,0.669,0.11652937169201837
+energy,Energie,"Décrit dans quelle mesure la piste est intense, active. 0 = prélude de Bach | 1 = death metal",0.7582307692307693,Energique,0.318,0.963,0.78,0.13849652504446713
+instrumentalness,Insturmentalité,"Décrit dans quelle proportion on entend des voix (paroles de chant, parlées) dans la piste. 0 = rap pur | 1 = pièce pour piano",0.007564300256410256,Majorité de paroles,0.0,0.15,0.0,0.029850692831988834
+key,Tonalité,"Donne la tonalité principale de la piste. 0 = Do, 1 = Do#, 2 = Ré, etc.",4.923076923076923,,0.0,11.0,4.0,3.673408107671413
+liveness,Live,Décrit si un public est présent. 0 = piste enregistré en studio | 1 = public qui chante avec l'artiste en concert,0.19714102564102565,Enregistrement studio,0.036,0.694,0.139,0.15455345646145716
+loudness,Puissance acoustique,Décrit à quel point la piste rend un son fort. -60 dB = ASMR | 0 dB = hard metal,-4.984641025641025,,-10.07,-1.538,-4.9,1.698356690066506
+mode,Mode,Donne le mode (majeur/mineur) de la piste. 0 = mineur ; 1 = majeur,0.5641025641025641,,0.0,1.0,1.0,0.502356122102941
+speechiness,Parler,Décrit dans quelle mesure la piste contient des paroles parlées. 0 = musique pure | 1 = podcast,0.07026410256410255,Musical,0.0292,0.392,0.046,0.06804589197229319
+tempo,Tempo,Donne le tempo de la piste en battementss par minute (BPM).,122.3185641025641,,74.11,189.868,120.97,23.77077767011074
+valence,Jovialité,Décrit la positivité communiquée par la piste. 0 = Sound of Silence | 1 = Happy,0.6306666666666667,Plutôt léger,0.286,0.965,0.66,0.21121008913966674
+popularity,Popularité,"Décrit l'étendue du public que la piste, et comment elle y est appréciée",71.87179487179488,Populaire,14.0,84.0,77.0,13.461796797212724
