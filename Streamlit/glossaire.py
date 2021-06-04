@@ -12,7 +12,7 @@ def main():
 
 def ac_body():
     st.title('SpotData')
-    st.write('Vous trouverez sur cette page une définition des différents audiofeatures, donnée par la documentation de Spotify. Tous ces indices sont mesurés entre 0 et 1.')
+    st.write('Vous trouverez sur cette page une définition des différents audiofeatures, donnée par la documentation de Spotify. La plupart de ces indices sont mesurés entre 0 et 1.')
     
     #Première possibilité de display
     Intervalle = [[0,1], [0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1]]
@@ -48,7 +48,7 @@ def ac_body():
     st.markdown("___Liveness___")
     st.write("La liveness permet de détecter la présence d'une audience dans l'enregistrement. Plus l'indice est proche de 1, plus il est probable que le morceau est live. Au dessus de 0.8, il est quasiment certain que l'enregistrement a été fait en live.")
     st.markdown("___Loudness___")
-    st.write("Le bruit est mesuré en décibel. Cette mesure est moyenné sur l'ensemble du morceau et ramené entre 0 et 1.")
+    st.write("Le bruit est le seule paramètre qui n'est pas mesuré entre 0 et mais sur une échelle de -60 dB à 0dB. Cette mesure est moyenné sur l'ensemble du morceau et ramené entre 0 et 1.")
     st.markdown("___Speechness___")
     st.write("Cet indice détecte la présence de parties parlées. Les enregistrements parlés (type poèmes, talk show, podcast) seront proche de 1. Au dessus de 0.66, l'enregistrement est probablement entièrement consitué de paroles. Entre 0.33 et 0.66, il y aura des paroles et de la musique, soit en alternance ou dans les cas comme le rap. En dessous de 0.33, il est probable que l'enregistrement soit de la musique, sans parties parlées.")
     st.markdown("___Valence___")
