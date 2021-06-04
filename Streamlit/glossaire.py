@@ -2,6 +2,7 @@
 
 import streamlit as st
 import pandas as pd
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title='Glossaire')
 
@@ -12,9 +13,11 @@ def main():
 def ac_body():
     st.title('SpotData')
     st.write('Vous trouverez sur cette page une définition des différents audiofeatures, donnée par la documentation de Spotify. Tous ces indices sont mesurés entre 0 et 1.')
+    
+    #Première possibilité de display
     Intervalle = [[0,1], [0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1]]
-    descrip=["L'acoustiness mesure l'acoustic du morceau. Plus il est proche de 1, plus il y a de chance que le morceau soit acoustique (avec des instruments non synthétiques.",
-    "La dansabilité mesure si un morceau est adapté à la danse à partir d'élements musicaux comme le tempo, la stabilité du rythme, la force de la rythmique. A 0, un morceau est très peu adapté à la danse alors qu'à 1 est un morceau trus dansable.",
+    descrip=["L'acoustiness mesure l'acoustic du morceau. Plus il est proche de 1, plus il y a de chance que le morceau soit acoustique (avec des instruments non synthétiques).",
+    "La dansabilité mesure si un morceau est adapté à la danse à partir d'élements musicaux comme le tempo, la stabilité du rythme, la force de la rythmique. A 0, un morceau est très peu adapté à la danse alors qu'à 1 est un morceau très dansable.",
     "L'énergie mesure la perception de l'intensité et de l'activité. Typiquement, les morceaux énergiques semblent rapides, forts et bruyant. Par exemple, le death metal est à haute énergie alors qu'un prélude de Bach est bas dans cette échelle. Les caractérisitques qui servent a créer cette donnée sont la sonorité perçue, le timbre, la vitesse d'apparition et l'entropie générale.",
     "Cet indice mesure si un morceau contient des voix. Plus l'indice est proche de 1, plus il est certain qu'il n'y a aucune voix. Une valeur au dessus de 0.5 tend à être un morceau instrumentaux mais la probabilité augmente quand on s'approche de 1.",
     "La liveness permet de détecter la présence d'une audience dans l'enregistrement. Plus l'indice est proche de 1, plus il est probable que le morceau est live. Au dessus de 0.8, il est quasiment certain que l'enregistrement a été fait en live.",
@@ -23,7 +26,17 @@ def ac_body():
     "Plus la valence est haute, plus le morceau est joyeux. A l'inverse, plus la valence est faible, plus le morceau est triste."]
     inde = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness', 'speechness', 'valence']
     df=pd.DataFrame({'Description' : descrip}, index = inde)
-    st.dataframe(df, height= 12000)
+    components.html(df.to_html(),height=600)
+
+    #Deuxième possibilité
+    res = "<style> \n table, th, td {padding: 10px; border: 1px solid black;border-collapse: collapse;} \n </style> "
+    res= res + "<table> \n" + '<tr> \n <th> Audiofeatures </th> \n <th> Description </th> \n </tr> \n'
+    for i in range(len(inde)):
+        res = res + '<tr> \n <td>' + inde[i] + '</td> \n'+ '<td>' + descrip[i] + '</td> \n </tr> \n'
+    res = res + '</table>'
+    components.html(res, height=700)
+
+    #Troisième possibilité
     st.markdown("___Acousticness___")
     st.write("L'acoustiness mesure l'acoustic du morceau. Plus il est proche de 1, plus il y a de chance que le morceau soit acoustique (avec des instruments non synthétiques.")
     st.markdown("___Danceability___")
