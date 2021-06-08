@@ -2,7 +2,49 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import pandas as pd
 from streamlit_une_page import MultiApp
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyOAuth
+import numpy as np
 
+def recup_noms_playlists_user(ident,secret,nombre):
+    client_credentials_manager = SpotifyClientCredentials(client_id=ident, client_secret=secret)
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+    playlists = sp.user_playlists(nombre)
+    L=[]
+    while playlists:
+        for i, playlist in enumerate(playlists['items']):
+            tab= playlist['uri'].split(':')
+            L.append(playlist['name'])
+        if playlists['next']:
+            playlists = sp.next(playlists)
+        else:
+            playlists = None
+    return L
+
+#Test de laffichage dun graphique avec un playlist:
+def test_data(data_csv,liste_feat):
+    data=pd.read_csv(data_csv)
+    data["release_year"]=date_to_year(data['release_date'])
+    y = data['release_year'].value_counts()
+    for aud_feat in liste_feat:
+        #On peut faire une boucle for pour afficher les graphs de tous les audiofeatures sélectionnés
+        #Et faire des if pour afficher un type de graph différent selon l'audiofeature?
+        if aud_feat=='release_year':
+            fig2,ax2=plt.subplots()
+            ax2.bar(y.index,y)
+            ax2.set_title('release_date')
+            st.pyplot(fig2)
+        else:
+            fig1,ax1=plt.subplots()
+            ax1.hist(data[aud_feat])
+            ax1.set_title(aud_feat)
+            st.pyplot(fig1)
+    return None
+
+def date_to_year(date):
+    return int(date[:4])
+date_to_year = np.vectorize(date_to_year)
 
 def accueil():
     st.title('SpotData')
@@ -34,39 +76,41 @@ def graph():
     st.header('Analyse de vos playlists')
     st.write('Nombre dans la playlist+durée d\'écoute totale')
     st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
-    st.selectbox('Choix de la playlist à analyser:',['Playlist1','Playlist2','etc'])
-    a=st.multiselect('Audio-Features',['Dansabilité','Energie','Speechiness','Tempo','Valence'])
+    box=st.selectbox('Vos playlists: ',recup_noms_playlists_user('1344579488b94b5690228b09751fefe5','a049d54e046d48d1a16d73250f733117','11122869277'))
+    a=st.multiselect('Audio-Features',['dansability','energy','speechiness','acousticness','instrumentalness','popularity','release_year','valence'])
     if a!=[]:
-        st.subheader('Vous avez choisi: **{}**'.format(a))
-        l=len(a)
-        if l==1:
-            fig,ax=plt.subplots()
-            ax.set_title('Histogramme de: '+a[0])   
-        else:
-            fig,ax=plt.subplots(1,l,figsize=(10,l//2))
-            i=0
-            for value in a:
-                ax[2*i//l].set_title('Histogramme de: '+value)
-                i+=1
-                if i==l:
-                    break
-        st.pyplot(fig)
-        if l>2:
-            st.write('Nuage de points')
-            fig,ax=plt.subplots(1,l,figsize=(10,l//2))
-            for j in (0,l-1):
-                ax[2*j//l].set_title('Nuage de points de: '+a[j]+', '+a[j+1])
-                ax[2*j//l].set_xlabel(a[j])
-                ax[2*j//l].set_ylabel(a[j+1])
-            st.pyplot(fig)
-        elif l==2:
-            st.write('Nuage de points')
-            fig,ax=plt.subplots(1,l-1,figsize=(10,l//2))
-            ax.set_title('Nuage de points de: '+a[0]+', '+a[1])
-            ax.set_xlabel(a[0])
-            ax.set_ylabel(a[1])
-            i+=1
-            st.pyplot(fig)  
+        test_data('df_example_01-Copy1.csv',a)
+    #if a!=[]:
+        #st.subheader('Vous avez choisi: **{}**'.format(a))
+        #l=len(a)
+        #if l==1:
+            #fig,ax=plt.subplots()
+            #ax.set_title('Histogramme de: '+a[0])   
+        #else:
+            #fig,ax=plt.subplots(1,l,figsize=(10,l//2))
+            #i=0
+            #for value in a:
+                #ax[2*i//l].set_title('Histogramme de: '+value)
+                #i+=1
+                #if i==l:
+                    #break
+        #st.pyplot(fig)
+        #if l>2:
+            #st.write('Nuage de points')
+            #fig,ax=plt.subplots(1,l,figsize=(10,l//2))
+            #for j in (0,l-1):
+                #ax[2*j//l].set_title('Nuage de points de: '+a[j]+', '+a[j+1])
+                #ax[2*j//l].set_xlabel(a[j])
+                #ax[2*j//l].set_ylabel(a[j+1])
+            #st.pyplot(fig)
+        #elif l==2:
+            #st.write('Nuage de points')
+            #fig,ax=plt.subplots(1,l-1,figsize=(10,l//2))
+            #ax.set_title('Nuage de points de: '+a[0]+', '+a[1])
+            #ax.set_xlabel(a[0])
+            #ax.set_ylabel(a[1])
+            #i+=1
+            #st.pyplot(fig)  
     return None
 
 def playlist():
@@ -74,7 +118,7 @@ def playlist():
     st.header('Recommandation de playlists')
     st.subheader('A partir de vos playlists, nous vous en proposons des nouvelles, de plusieurs manières différentes.')
     st.subheader('A partir de quelle playlist souhaitez-vous en obtenir une nouvelle?')
-    b=st.selectbox('Vos playlists: ',['Choisissez une playlist','Tous vos titres','Playlist 1','Playlist 2','...'])
+    b=st.selectbox('Vos playlists: ',recup_noms_playlists_user('1344579488b94b5690228b09751fefe5','a049d54e046d48d1a16d73250f733117','11122869277'))
     st.write('Pour l\'instant, 1 seul type de recommandations')
     data={'Track':['Track 1','Track 2','...'],
             'Artist':['Artist 1','Artist 2','...'],
