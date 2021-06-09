@@ -144,11 +144,14 @@ def graph():
     return None
 
 def playlist():
+    sp = get_spotipy_ready()
+    playlists = sp.current_user_playlists()
+    name_playlists, id_playlists = get_playlists(playlists["items"])
     st.title('SpotData')
     st.header('Recommandation de playlists')
     st.subheader('A partir de vos playlists, nous vous en proposons des nouvelles, de plusieurs manières différentes.')
     st.subheader('A partir de quelle playlist souhaitez-vous en obtenir une nouvelle?')
-    b=st.selectbox('Vos playlists: ',recup_noms_playlists_user('1344579488b94b5690228b09751fefe5','a049d54e046d48d1a16d73250f733117','11122869277'))
+    b=st.selectbox('Vos playlists: ',name_playlists)
     st.write('Pour l\'instant, 1 seul type de recommandations')
     data={'Track':['Track 1','Track 2','...'],
             'Artist':['Artist 1','Artist 2','...'],
@@ -193,13 +196,13 @@ def glossaire():
     pd_gloss=pd.DataFrame(gloss)
 
     st.markdown("___Acousticness___")
-    st.write("L'acoustiness mesure l'acoustic du morceau. Plus il est proche de 1, plus il y a de chance que le morceau soit acoustique (avec des instruments non synthétiques.")
+    st.write("L'acoustiness mesure l'acoustic du morceau. Plus il est proche de 1, plus il y a de chance que le morceau soit acoustique (avec des instruments non synthétiques).")
     st.markdown("___Danceability___")
-    st.write("La dansabilité mesure si un morceau est adapté à la danse à partir d'élements musicaux comme le tempo, la stabilité du rythme, la force de la rythmique. A 0, un morceau est très peu adapté à la danse alors qu'à 1 est un morceau trus dansable.")
+    st.write("La dansabilité mesure si un morceau est adapté à la danse à partir d'élements musicaux comme le tempo, la stabilité du rythme, la force de la rythmique. A 0, un morceau est très peu adapté à la danse alors qu'à 1 est un morceau très dansable.")
     st.markdown("___Energy___")
-    st.write("L'énergie mesure la perception de l'intensité et de l'activité. Typiquement, les morceaux énergiques semblent rapides, forts et bruyant. Par exemple, le death metal est à haute énergie alors qu'un prélude de Bach est bas dans cette échelle. Les caractérisitques qui servent a créer cette donnée sont la sonorité perçue, le timbre, la vitesse d'apparition et l'entropie générale.")
+    st.write("L'énergie mesure la perception de l'intensité et de l'activité. Typiquement, les morceaux énergiques semblent rapides, forts et bruyant. Par exemple, le death metal est à haute énergie alors qu'un prélude de Bach est bas dans cette échelle. Les caractéristiques qui servent a créer cette donnée sont la sonorité perçue, le timbre, la vitesse d'apparition et l'entropie générale.")
     st.markdown("___Instrumentalness___")
-    st.write("Cet indice mesure si un morceau contient des voix. Plus l'indice est proche de 1, plus il est certain qu'il n'y a aucune voix. Une valeur au dessus de 0.5 tend à être un morceau instrumentaux mais la probabilité augmente quand on s'approche de 1.")
+    st.write("Cet indice mesure si un morceau contient des voix. Plus l'indice est proche de 1, plus il est certain qu'il n'y a aucune voix. Une valeur au dessus de 0.5 tend à être un morceau instrumental mais la probabilité augmente quand on s'approche de 1.")
     st.markdown("___Liveness___")
     st.write("La liveness permet de détecter la présence d'une audience dans l'enregistrement. Plus l'indice est proche de 1, plus il est probable que le morceau est live. Au dessus de 0.8, il est quasiment certain que l'enregistrement a été fait en live.")
     st.markdown("___Loudness___")
