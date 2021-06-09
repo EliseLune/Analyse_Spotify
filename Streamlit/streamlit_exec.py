@@ -2,10 +2,21 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import pandas as pd
 from streamlit_une_page import MultiApp
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
+import os
 from spotipy.oauth2 import SpotifyOAuth
+import spotipy
+from spotipy.cache_handler import CacheHandler
+from data_collector.secrets_spotify import client_id,client_secret,redirect_uri
+from data_collector.spotify_connector import get_spotipy
+from streamlit import caching
 import numpy as np
+from analyse import *
+
+@st.cache(allow_output_mutation=True)
+def get_spotipy_ready():
+    sp = get_spotipy("playlist-read-private user-read-email user-read-private", client_id,client_secret,redirect_uri)
+    res=sp.current_user
+    return sp
 
 def recup_noms_playlists_user(ident,secret,nombre):
     client_credentials_manager = SpotifyClientCredentials(client_id=ident, client_secret=secret)
@@ -47,22 +58,38 @@ def date_to_year(date):
 date_to_year = np.vectorize(date_to_year)
 
 def accueil():
+    caching.clear_cache()
     st.title('SpotData')
     st.write('Par P.Vehrlé, J.Delaplace, C.Nothhelfer, E.Lei')
     st.write('SpotData est une Webapp vous proposant de faire analyser vos playlists Spotify, et de découvrir encore plus de musiques qui vous correspondent.')
-    st.button('SE CONNECTER')
+    st.write("Vous allez être redirigé vers une page d'autentification. Une fois cette dernière finie, revenez sur cette page")
+    textPlaceholder = st.empty()
+    click = textPlaceholder.button("Se connecter à Spotify")
+    if click:
+        textPlaceholder.text("Vous êtes connecté. Vous pouvez allez naviguer sur le reste de l'application.")
+        sp = get_spotipy_ready()
+        res = sp.current_user()
     return None
 
 def apres_auth():
     st.title('SpotData')
-    st.header('Bienvenue, [Nom de l\'utilisateur]!')
-    st.image('Desktop/spotify_profil_mockup.png')
-    st.write('Infos utilisateur')
-    st.write('E-mail')
-    st.write('Pays')
+    sp = get_spotipy_ready()
+    user_info = sp.current_user()
+    st.header("Bienvenue, {}".format(user_info['display_name']))
+    # st.image('Desktop/spotify_profil_mockup.png')
+
+    st.subheader('Mes informations')
+    if user_info["images"]!=[]:
+        st.image(user_info["images"][0]["url"])
+    if user_info["email"]!=[]:
+        st.write("E-mail : {}".format(user_info["email"]))
+    if user_info["country"]!=[]:
+        st.write("Pays : {}".format(user_info["country"]))
+
+    playlists = sp.current_user_playlists()
     st.subheader('Pour commencer, une vision d\'ensemble de votre musique')
     st.write('Statistiques globales:')
-    st.write('  - Nombre de playlists')
+    st.write('  - Nombre de playlists : {}'.format(len(playlists["items"])))
     st.write('  - Nombre de titres enregistrés')
     st.write('  - Nombre d\'artistes écoutés')
     st.write('Top 5 des artistes écoutés')
@@ -72,11 +99,14 @@ def apres_auth():
 
 
 def graph():
+    sp = get_spotipy_ready()
+    playlists = sp.current_user_playlists()
+    name_playlists, id_playlists = get_playlists(playlists["items"])
     st.title('SpotData')
     st.header('Analyse de vos playlists')
     st.write('Nombre dans la playlist+durée d\'écoute totale')
     st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
-    box=st.selectbox('Vos playlists: ',recup_noms_playlists_user('1344579488b94b5690228b09751fefe5','a049d54e046d48d1a16d73250f733117','11122869277'))
+    box=st.selectbox('Vos playlists: ',name_playlists)
     a=st.multiselect('Audio-Features',['dansability','energy','speechiness','acousticness','instrumentalness','popularity','release_year','valence'])
     if a!=[]:
         test_data('df_example_01-Copy1.csv',a)
