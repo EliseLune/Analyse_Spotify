@@ -99,7 +99,7 @@ def apres_auth():
     return None
 
 
-def graph():
+def analyse():
     sp = get_spotipy_ready()
     playlists = sp.current_user_playlists()
     name_playlists, id_playlists = get_playlists(playlists["items"])
@@ -144,7 +144,7 @@ def graph():
             #st.pyplot(fig)  
     return None
 
-def playlist():
+def recommandation():
     sp = get_spotipy_ready()
     playlists = sp.current_user_playlists()
     name_playlists, id_playlists = get_playlists(playlists["items"])
@@ -249,8 +249,8 @@ def apropos():
 app = MultiApp()
 app.add_app("Se déconnecter", accueil)
 app.add_app("Accueil", apres_auth)
-app.add_app("Analyse", graph)
-app.add_app("Recommandations", playlist)
+app.add_app("Analyse", analyse)
+app.add_app("Recommandations", recommandation)
 app.add_app("Glossaire",glossaire)
 app.add_app("A propos",apropos)
 app.run()
