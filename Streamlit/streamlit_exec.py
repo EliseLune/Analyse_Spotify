@@ -10,7 +10,7 @@ from data_collector.secrets_spotify import client_id,client_secret,redirect_uri
 from data_collector.spotify_connector import get_spotipy
 from streamlit import caching
 import numpy as np
-from analyse import *
+from code_complementaire.analyse import *
 
 @st.cache(allow_output_mutation=True)
 def get_spotipy_ready():
