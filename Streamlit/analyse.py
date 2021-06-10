@@ -10,7 +10,7 @@ import numpy as np
 import json
 
 
-def getTrackIDs(playlist_id,):
+def getTrackIDs(playlist_id,sp):
     ids = []
     playlist = sp.playlist(playlist_id)
     for item in playlist['tracks']['items']:
