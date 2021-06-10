@@ -94,3 +94,36 @@ def get_playlists(items):
         name_playlists.append(dict["name"])
         id_playlists.append(dict["id"])
     return name_playlists,id_playlists
+
+def name_to_id(names,ids,name_to_search):
+    numero = names.index(name_to_search)
+    return ids[numero]
+
+
+def premiere_recommandation(playlist_id,sp):
+    tracks = getTrackIDs(playlist_id,sp)
+    reco = []
+    for track in tracks:
+        artist_id = sp.track(tracks[0])["artists"][0]["id"]
+        res = sp.recommendations(seed_tracks = [tracks[0]],seed_artist=artist_id, limit=1)
+        reco.append(res["tracks"][0]["id"])
+    return reco
+
+def get_artists(track_id,sp):
+    liste_artists = sp.track(track_id)["artists"]
+    res= []
+    for truc in liste_artists:
+        res.append(truc["name"])
+    str = ''
+    for artist in res[:-1]:
+        str = str + artist +', '
+    str = str + res[-1]
+    return str
+
+def mise_en_forme(id_to_change,sp):
+    res = premiere_recommandation(id_to_change,sp)
+    names = [sp.track(trackie)["name"] for trackie in res]
+    return {'Track':names,
+            'Artist':[get_artists(trackie,sp) for trackie in res],
+            'Album':[sp.track(trackie)["album"]["name"] for trackie in res],
+            'TrackId':res,}

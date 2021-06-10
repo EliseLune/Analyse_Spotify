@@ -156,6 +156,8 @@ def recommandation():
     st.subheader('A partir de quelle playlist souhaitez-vous en obtenir une nouvelle?')
     playlist_to_change=st.selectbox('Vos playlists: ',name_playlists)
     recommande=st.button("C'est parti !")
+    id_to_change=name_to_id(name_playlists,id_playlists,playlist_to_change)
+    
     # if recommande:
     st.write('Pour l\'instant, 1 seul type de recommandations')
     data={'Track':['Track 1','Track 2','...'],
@@ -164,6 +166,8 @@ def recommandation():
             'TrackId':['TrackId 1','TrackId 2','...'],}
     pd_data=pd.DataFrame(data)
     st.dataframe(pd_data)
+
+    st.dataframe(mise_en_forme(id_to_change,sp))
 
     # Création de la playlist sur Spotify
     nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
