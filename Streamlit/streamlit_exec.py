@@ -14,7 +14,8 @@ from analyse import *
 
 @st.cache(allow_output_mutation=True)
 def get_spotipy_ready():
-    sp = get_spotipy("playlist-read-private user-read-email user-read-private", client_id,client_secret,redirect_uri)
+    scope = "playlist-read-private user-read-email user-read-private playlist-modify-private user-top-read"
+    sp = get_spotipy(scope, client_id,client_secret,redirect_uri)
     res=sp.current_user
     return sp
 
@@ -150,30 +151,34 @@ def playlist():
     st.title('SpotData')
     st.header('Recommandation de playlists')
     st.subheader('A partir de vos playlists, nous vous en proposons des nouvelles, de plusieurs manières différentes.')
+
+    #Choix de la playlist
     st.subheader('A partir de quelle playlist souhaitez-vous en obtenir une nouvelle?')
-    b=st.selectbox('Vos playlists: ',name_playlists)
-    st.write('Pour l\'instant, 1 seul type de recommandations')
-    data={'Track':['Track 1','Track 2','...'],
-            'Artist':['Artist 1','Artist 2','...'],
-            'Album':['Album 1','Album 2','...'],
-            'TrackId':['TrackId 1','TrackId 2','...'],}
-    pd_data=pd.DataFrame(data)
-    st.dataframe(pd_data)
+    playlist_to_change=st.selectbox('Vos playlists: ',name_playlists)
+    recommande=st.button("C'est parti !")
+    if recommande:
+        st.write('Pour l\'instant, 1 seul type de recommandations')
+        data={'Track':['Track 1','Track 2','...'],
+                'Artist':['Artist 1','Artist 2','...'],
+                'Album':['Album 1','Album 2','...'],
+                'TrackId':['TrackId 1','TrackId 2','...'],}
+        pd_data=pd.DataFrame(data)
+        st.dataframe(pd_data)
 
     # Création de la playlist sur Spotify
-    nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
-    textPlaceholder = st.empty()
-    click = textPlaceholder.button("Ajouter cette playlist dans Spotify")
-    if click:
-        textPlaceholder.text("Votre playlist a bien été créée. Allez sur Spotify pour l'écouter.")
-        st.write(nom_playlist)
-        sp = get_spotipy_ready()
-        user_info = sp.current_user()
-        new_playlist = sp.user_playlist_create(user_info["id"],nom_playlist, public=False)
-        new_playlist_id = new_playlist["id"]
-        # liste = getTrackIDs('64e2SkGAkaMkr4KWO2gDqs',sp)
-        # st.write(liste[:])
-        # sp.user_playlist_add_tracks(user_info["id"], new_playlist_id, [])
+        nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
+        textPlaceholder = st.empty()
+        click = textPlaceholder.button("Ajouter cette playlist dans Spotify")
+        if click:
+            textPlaceholder.text("Votre playlist a bien été créée. Allez sur Spotify pour l'écouter.")
+            st.write(nom_playlist)
+            sp = get_spotipy_ready()
+            user_info = sp.current_user()
+            new_playlist = sp.user_playlist_create(user_info["id"],nom_playlist, public=False)
+            new_playlist_id = new_playlist["id"]
+            # liste = getTrackIDs('64e2SkGAkaMkr4KWO2gDqs',sp)
+            # st.write(liste[:])
+            # sp.user_playlist_add_tracks(user_info["id"], new_playlist_id, [])
 
     #LA SUITE SERVIRA PEUT-ÊTRE PLUS TARD
     #if b=='Playlist sur critères':
@@ -228,21 +233,23 @@ def glossaire():
     st.markdown("___Valence___")
     st.write("Plus la valence est haute, plus le morceau est joyeux. A l'inverse, plus la valence est faible, plus le morceau est triste.")
 
-    st.table(pd_gloss)
+    st.subheader("Pour avoir plus d'information,")
+    st.write("[Visitez ce site](https://rpubs.com/PeterDola/SpotifyTracks)")
+    # st.table(pd_gloss)
     return None
 
 def apropos():
     st.title('SpotData')
     st.header('A propos')
     st.write('SpotData est une WebApp développée par 4 élèves de l\'école Mines Paristech (nos noms) dans le cadre d\'un projet d\'informatique.')
-    st.write('Le but est d\'analyser des playlists Spotify et de proposer des recommandations grâce au module python Spotipy')
-    st.write('Lien du dépot Github du projet:')
-    st.write('Lien du site des Mines:')
+    st.write("Le but est d\'analyser des playlists Spotify et de proposer des recommandations grâce au module python Spotipy. Cette application est développée à l'aide de Streamlit")
+    st.write('[Lien du dépot Github du projet](https://github.com/EliseLune/Analyse_Spotify)')
+    st.write('[Lien du site des Mines](https://www.minesparis.psl.eu/)')
     return None
 app = MultiApp()
 app.add_app("Se déconnecter", accueil)
 app.add_app("Accueil", apres_auth)
-app.add_app("Mes Graphiques", graph)
+app.add_app("Analyse", graph)
 app.add_app("Recommandations", playlist)
 app.add_app("Glossaire",glossaire)
 app.add_app("A propos",apropos)
