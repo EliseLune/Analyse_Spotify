@@ -156,29 +156,28 @@ def recommandation():
     st.subheader('A partir de quelle playlist souhaitez-vous en obtenir une nouvelle?')
     playlist_to_change=st.selectbox('Vos playlists: ',name_playlists)
     recommande=st.button("C'est parti !")
-    if recommande:
-        st.write('Pour l\'instant, 1 seul type de recommandations')
-        data={'Track':['Track 1','Track 2','...'],
-                'Artist':['Artist 1','Artist 2','...'],
-                'Album':['Album 1','Album 2','...'],
-                'TrackId':['TrackId 1','TrackId 2','...'],}
-        pd_data=pd.DataFrame(data)
-        st.dataframe(pd_data)
+    # if recommande:
+    st.write('Pour l\'instant, 1 seul type de recommandations')
+    data={'Track':['Track 1','Track 2','...'],
+            'Artist':['Artist 1','Artist 2','...'],
+            'Album':['Album 1','Album 2','...'],
+            'TrackId':['TrackId 1','TrackId 2','...'],}
+    pd_data=pd.DataFrame(data)
+    st.dataframe(pd_data)
 
     # Création de la playlist sur Spotify
-        nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
-        textPlaceholder = st.empty()
-        click = textPlaceholder.button("Ajouter cette playlist dans Spotify")
-        if click:
-            textPlaceholder.text("Votre playlist a bien été créée. Allez sur Spotify pour l'écouter.")
-            st.write(nom_playlist)
-            sp = get_spotipy_ready()
-            user_info = sp.current_user()
-            new_playlist = sp.user_playlist_create(user_info["id"],nom_playlist, public=False)
-            new_playlist_id = new_playlist["id"]
-            # liste = getTrackIDs('64e2SkGAkaMkr4KWO2gDqs',sp)
-            # st.write(liste[:])
-            # sp.user_playlist_add_tracks(user_info["id"], new_playlist_id, [])
+    nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
+    textPlaceholder = st.empty()
+    click = textPlaceholder.button("Ajouter cette playlist dans Spotify")
+    if click:
+        textPlaceholder.text("Votre playlist a bien été créée. Allez sur Spotify pour l'écouter.")
+        st.write(nom_playlist)
+        sp = get_spotipy_ready()
+        user_info = sp.current_user()
+        new_playlist = sp.user_playlist_create(user_info["id"],nom_playlist, public=False)
+        new_playlist_id = new_playlist["id"]
+        # a décommenter quand on aura toute l'analyse
+        # sp.user_playlist_add_tracks(user_info["id"], new_playlist_id, liste_des_tracks_a_ajouter)
 
     #LA SUITE SERVIRA PEUT-ÊTRE PLUS TARD
     #if b=='Playlist sur critères':
