@@ -61,7 +61,7 @@ date_to_year = np.vectorize(date_to_year)
 def accueil():
     caching.clear_cache()
     st.title('SpotData')
-    st.write('Par P.Vehrlé, J.Delaplace, C.Nothhelfer, E.Lei')
+    st.write('Par J.Delaplace, E.Lei, C.Nothhelfer, P.Vehrlé')
     st.write('SpotData est une Webapp vous proposant de faire analyser vos playlists Spotify, et de découvrir encore plus de musiques qui vous correspondent.')
     st.write("Vous allez être redirigé vers une page d'autentification. Une fois cette dernière finie, revenez sur cette page")
     textPlaceholder = st.empty()
@@ -89,12 +89,17 @@ def apres_auth():
 
     playlists = liste_playlists_id(sp.current_user_playlists(),sp)
     st.subheader('Pour commencer, une vision d\'ensemble de votre musique')
-    st.write('Statistiques globales:')
+    st.write('Statistiques globales :')
     st.write('  - Nombre de playlists : {}'.format(len(playlists)))
     st.write('  - Nombre de titres enregistrés : {}'.format(len(all_tracks(playlists,sp))))
     st.write('  - Nombre d\'artistes écoutés : {}'.format(len(all_artists(playlists,sp))))
-    st.write('Top 5 des artistes écoutés')
-    st.write('Musique la plus écoutée:')
+    
+    top_artists = sp.current_user_top_artists()
+    if top_artists["total"]!=0:
+        st.write('  - Top 5 des artistes écoutés : {}'.format(top_artists["items"])) #pour ce cas et le suivant, il faut pouvoir tester avec un compte qui a des lectures sur spotipy
+    top_tracks = sp.current_user_top_tracks()
+    if top_tracks["total"]!=0:
+        st.write('  - Musique la plus écoutée : {}'.format(top_tracks["items"]))
     st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')
     return None
 
@@ -249,8 +254,8 @@ def glossaire():
 def apropos():
     st.title('SpotData')
     st.header('A propos')
-    st.write('SpotData est une WebApp développée par 4 élèves de l\'école Mines Paristech (nos noms) dans le cadre d\'un projet d\'informatique.')
-    st.write("Le but est d\'analyser des playlists Spotify et de proposer des recommandations grâce au module python Spotipy. Cette application est développée à l'aide de Streamlit")
+    st.write('SpotData est une WebApp développée par 4 élèves de l\'école Mines Paristech (J.Delaplace, E.Lei, C.Nothhelfer, P.Vehrlé) dans le cadre d\'un projet d\'informatique.')
+    st.write("Le but est d\'analyser des playlists Spotify et de proposer des recommandations grâce au module python Spotipy. Cette application est développée avec Streamlit.")
     st.write('[Lien du dépot Github du projet](https://github.com/EliseLune/Analyse_Spotify)')
     st.write('[Lien du site des Mines](https://www.minesparis.psl.eu/)')
     return None
