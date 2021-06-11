@@ -87,12 +87,12 @@ def apres_auth():
     if user_info["country"]!=[]:
         st.write("Pays : {}".format(user_info["country"]))
 
-    playlists = sp.current_user_playlists()
+    playlists = liste_playlists_id(sp.current_user_playlists(),sp)
     st.subheader('Pour commencer, une vision d\'ensemble de votre musique')
     st.write('Statistiques globales:')
-    st.write('  - Nombre de playlists : {}'.format(len(playlists["items"])))
-    st.write('  - Nombre de titres enregistrés')
-    st.write('  - Nombre d\'artistes écoutés')
+    st.write('  - Nombre de playlists : {}'.format(len(playlists)))
+    st.write('  - Nombre de titres enregistrés : {}'.format(len(all_tracks(playlists,sp))))
+    st.write('  - Nombre d\'artistes écoutés : {}'.format(len(all_artists(playlists,sp))))
     st.write('Top 5 des artistes écoutés')
     st.write('Musique la plus écoutée:')
     st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')

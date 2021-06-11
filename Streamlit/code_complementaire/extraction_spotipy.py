@@ -8,6 +8,7 @@ import plotly
 import plotly.graph_objs as go
 import numpy as np
 import json
+import streamlit as st
 
 
 def getTrackIDs(playlist_id,sp):
@@ -105,7 +106,7 @@ def premiere_recommandation(playlist_id,sp):
     reco = []
     for track in tracks:
         artist_id = sp.track(tracks[0])["artists"][0]["id"]
-        res = sp.recommendations(seed_tracks = [tracks[0]],seed_artist=artist_id, limit=1)
+        res = sp.recommendations(seed_tracks = [tracks[0]],seed_artist=artist_id, limit=1, traget_valence=sp.audio_features(track)[0]['valence'])
         reco.append(res["tracks"][0]["id"])
     return reco
 
@@ -127,3 +128,26 @@ def mise_en_forme(id_to_change,sp):
             'Artist':[get_artists(trackie,sp) for trackie in res],
             'Album':[sp.track(trackie)["album"]["name"] for trackie in res],
             'TrackId':res,}
+
+def all_tracks(playlists,sp):
+    all_tracks=[]
+    for playlist in playlists:
+        tracks = getTrackIDs(playlist,sp)
+        all_tracks = all_tracks + tracks
+    return list(set(all_tracks))
+
+def liste_playlists_id(truc,sp):
+    res=[]
+    for dico in truc["items"]:
+        res.append(dico["id"])
+    return res
+
+def all_artists(playlists,sp):
+    res=[]
+    for playlist in playlists:
+        intermediaire = sp.playlist(playlist)
+        tracks=intermediaire["tracks"]["items"]
+        for track in tracks:
+            for artist in track["track"]["artists"]:
+                res.append(artist["id"])
+    return list(set(res))
