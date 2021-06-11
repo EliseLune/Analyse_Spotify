@@ -45,12 +45,16 @@ def test_data(data_csv,liste_feat):
         if aud_feat=='release_year':
             fig2,ax2=plt.subplots()
             ax2.bar(y.index,y)
-            ax2.set_title('release_date')
+            ax2.set_title('Release date')
+            ax2.set_xlabel('Release date')
+            ax2.set_ylabel('Number of tracks')
             st.pyplot(fig2)
         else:
             fig1,ax1=plt.subplots()
             ax1.hist(data[aud_feat])
             ax1.set_title(aud_feat)
+            ax1.set_xlabel(aud_feat)
+            ax1.set_ylabel('Number of tracks')
             st.pyplot(fig1)
     return None
 
