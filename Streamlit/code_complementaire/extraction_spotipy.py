@@ -151,3 +151,11 @@ def all_artists(playlists,sp):
             for artist in track["track"]["artists"]:
                 res.append(artist["id"])
     return list(set(res))
+
+def artists_to_list(top_artists):
+    tutu=top_artists["items"]
+    res=""
+    for artist in tutu[:-1]:
+        res = res + artist["name"] + ', '
+    res = res + tutu[-1]["name"]
+    return res

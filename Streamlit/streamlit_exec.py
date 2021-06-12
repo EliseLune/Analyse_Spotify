@@ -98,12 +98,12 @@ def apres_auth():
     st.write('  - Nombre de titres enregistrés : {}'.format(len(all_tracks(playlists,sp))))
     st.write('  - Nombre d\'artistes écoutés : {}'.format(len(all_artists(playlists,sp))))
     
-    top_artists = sp.current_user_top_artists()
+    top_artists = sp.current_user_top_artists(limit=5)
     if top_artists["total"]!=0:
-        st.write('  - Top 5 des artistes écoutés : {}'.format(top_artists["items"])) #pour ce cas et le suivant, il faut pouvoir tester avec un compte qui a des lectures sur spotipy
-    top_tracks = sp.current_user_top_tracks()
+        st.write('  - Artistes les plus écoutés : {}'.format(artists_to_list(top_artists)))
+    top_tracks = sp.current_user_top_tracks(limit=1)
     if top_tracks["total"]!=0:
-        st.write('  - Musique la plus écoutée : {}'.format(top_tracks["items"]))
+        st.write('  - Musique la plus écoutée : {}'.format(top_tracks["items"][0]["name"]))
     st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')
     return None
 
