@@ -167,7 +167,11 @@ def recommandation():
     if playlist_to_change!='<select>':
 
         id_to_change=name_to_id(name_playlists,id_playlists,playlist_to_change)
-        
+
+        st.subheader("Choississez des audiofeatures à garder similaires dans la nouvelles playlist")
+        audiofeatures_chosen=st.multiselect('Audio-Features',['dansability','energy','speechiness','acousticness','instrumentalness','popularity','release_year','valence'])
+        if audiofeatures_chosen!=[]:
+            st.write(audiofeatures_chosen)
         st.subheader('Voici les morceaux que vous nous recommendons.')
         # data={'Track':['Track 1','Track 2','...'],
                 # 'Artist':['Artist 1','Artist 2','...'],
@@ -181,7 +185,7 @@ def recommandation():
         st.dataframe(set, height=30*(n+1))
 
         # Création de la playlist sur Spotify
-        st.subheader("Notre proposition vous plait? Ajouter cette nouvelle playlist sur Spotify !")
+        st.subheader("Notre proposition vous plaît? Ajouter cette nouvelle playlist sur Spotify !")
         nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
         sp=get_spotipy_ready()
         textPlaceholder = st.empty()
