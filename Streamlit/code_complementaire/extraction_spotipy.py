@@ -18,10 +18,10 @@ def getTrackIDs(playlist_id,sp):
         ids.append(item["track"]['id'])
     return ids
 
-def getTrackFeatures(id):
+def getTrackFeatures(id,sp):
     meta = sp.track(id)
     features = sp.audio_features(id)
-    return [meta['name'], 
+    return [id, meta['name'], 
             meta['album']['name'],
             meta['album']['artists'][0]['name'],
             meta['album']['release_date'],
@@ -41,15 +41,15 @@ def getTrackFeatures(id):
              features[0]['valence']]
 
 
-def creat_df_audiofeatures(playlist_id):
-    ids = getTrackIDs(playlist_id)
+def creat_df_audiofeatures(playlist_id,sp):
+    ids = getTrackIDs(playlist_id,sp)
     tracks = []
     for i in range(len(ids)):
-        track = getTrackFeatures(ids[i])
+        track = getTrackFeatures(ids[i],sp)
         tracks.append(track)
-    return pd.DataFrame(tracks, columns = ['name', 'album', 'artist', 'release_date', 'length', 'popularity', 'acousticness', 'danceability', 'energy', 'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'time_signature','valence'])
+    return pd.DataFrame(tracks, columns = ['id','name', 'album', 'artist', 'release_date', 'length', 'popularity', 'acousticness', 'danceability', 'energy', 'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'time_signature','valence'])
     
-def get_playlist_id(user_id):
+def get_playlist_id(user_id,sp):
     playlists = sp.user_playlists(user_id)
     res=[]
     ide=[]
