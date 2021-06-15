@@ -21,8 +21,10 @@ def recommandation_souflee(playlist_id, audiofeatures,sp):
         for j,audio in enumerate(audiofeatures):
             df = df[(df[audio] > playlist[i][j+1] -0.1) & (df[audio] > playlist[i][j+1] -0.1)]
         df.reset_index(drop=True, inplace=True)
-        nouvelle_playlist.append(df["id"][0])
-    return nouvelle_playlist
+        n,m=df.shape
+        if n!=0:
+            nouvelle_playlist.append(df["id"][0])
+    return list(set(nouvelle_playlist))
 
 #maybe i'll have to define i with the id of the track
 #returns a dataframe with only the first artist of the track

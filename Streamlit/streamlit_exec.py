@@ -179,7 +179,8 @@ def recommandation():
             'Artist':[get_artists(trackie,sp) for trackie in nouvelle_playlist],
             'Album':[sp.track(trackie)["album"]["name"] for trackie in nouvelle_playlist],
             'TrackId':nouvelle_playlist,}
-            st.dataframe(df)
+            n=len(df["Track"])
+            st.dataframe(df, height=30*(n+1))
         # data={'Track':['Track 1','Track 2','...'],
                 # 'Artist':['Artist 1','Artist 2','...'],
                 # 'Album':['Album 1','Album 2','...'],
