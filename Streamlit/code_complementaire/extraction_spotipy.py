@@ -1,11 +1,6 @@
-import spotipy
 import os
 import sys
-from spotipy.oauth2 import SpotifyClientCredentials
-from spotipy.oauth2 import SpotifyOAuth
 import pandas as pd
-import plotly
-import plotly.graph_objs as go
 import numpy as np
 import json
 import streamlit as st
@@ -67,26 +62,6 @@ def get_playlist_id(user_id,sp):
 
 # results = spotify.user_playlist(user=None, playlist_id="3cqDkXVInhOYPpJyVzvwux", fields="name")
 # results["name"]
-
-# Pour créer le plot de la playlist, pour l'instant seulement la dancebility
-def create_plot(df):
-
-    N,m = df.shape
-    x = df['name'].tolist()
-    y=df['danceability'].tolist()
-    df = pd.DataFrame({'x': x, 'y': y}) # creating a sample dataframe
-
-
-    data = [
-        go.Bar(
-            x=df['x'], # assign x as the dataframe column 'x'
-            y=df['y']
-        )
-    ]
-
-    graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
-
-    return graphJSON
 
 def get_playlists(items):
     name_playlists= []
@@ -159,3 +134,8 @@ def artists_to_list(top_artists):
         res = res + artist["name"] + ', '
     res = res + tutu[-1]["name"]
     return res
+
+#une autre possibilité de recommandation
+#set = mise_en_forme(id_to_change,sp)
+#n=len(set["Track"])
+#st.dataframe(set, height=30*(n+1))

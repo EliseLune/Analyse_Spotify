@@ -172,37 +172,33 @@ def recommandation():
         st.write("N'en choissiez pas trop, la recommendation serait bien plus compliquée !")
         audiofeatures_chosen=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','release_year','valence'])
         if audiofeatures_chosen!=[]:
-            st.write(audiofeatures_chosen)
-            source = recommandation_souflee(id_to_change,audiofeatures_chosen,sp)
-            st.write(source)
-        st.subheader('Voici les morceaux que vous nous recommendons.')
+            nouvelle_playlist = recommandation_souflee(id_to_change,audiofeatures_chosen,sp)
+            st.subheader('Voici les morceaux que vous nous recommendons.')
+            names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
+            df = {'Track':names,
+            'Artist':[get_artists(trackie,sp) for trackie in nouvelle_playlist],
+            'Album':[sp.track(trackie)["album"]["name"] for trackie in nouvelle_playlist],
+            'TrackId':nouvelle_playlist,}
+            st.dataframe(df)
         # data={'Track':['Track 1','Track 2','...'],
                 # 'Artist':['Artist 1','Artist 2','...'],
                 # 'Album':['Album 1','Album 2','...'],
                 # 'TrackId':['TrackId 1','TrackId 2','...'],}
         # pd_data=pd.DataFrame(data)
         # st.dataframe(pd_data)
-
-        set = mise_en_forme(id_to_change,sp)
-        n=len(set["Track"])
-        st.dataframe(set, height=30*(n+1))
         
-        # Création de la playlist sur Spotify
-        st.subheader("Notre proposition vous plaît? Ajouter cette nouvelle playlist sur Spotify !")
-        nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
-        sp=get_spotipy_ready()
-        textPlaceholder = st.empty()
-        click = textPlaceholder.button("Ajouter cette playlist dans Spotify")
+            # Création de la playlist sur Spotify
+            st.subheader("Notre proposition vous plaît? Ajouter cette nouvelle playlist sur Spotify !")
+            nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
+            textPlaceholder = st.empty()
+            click = textPlaceholder.button("Ajouter cette playlist dans Spotify")
 
-        if click:
-            textPlaceholder.text("Votre playlist a bien été créée. Allez sur Spotify pour l'écouter.")
-            st.write(nom_playlist)
-            user_info = sp.current_user()
-            new_playlist = sp.user_playlist_create(user_info["id"],nom_playlist, public=False)
-            new_playlist_id = new_playlist["id"]
-            st.write(new_playlist_id)
-            # a décommenter quand on aura toute l'analyse
-            # sp.user_playlist_add_tracks(user_info["id"], new_playlist_id, liste_des_tracks_a_ajouter)
+            if click:
+                textPlaceholder.text("Votre playlist a bien été créée. Allez sur Spotify pour l'écouter.")
+                user_info = sp.current_user()
+                new_playlist = sp.user_playlist_create(user_info["id"],nom_playlist, public=False)
+                new_playlist_id = new_playlist["id"]
+                sp.user_playlist_add_tracks(user_info["id"], new_playlist_id, nouvelle_playlist)
 
     #LA SUITE SERVIRA PEUT-ÊTRE PLUS TARD
     #if b=='Playlist sur critères':
