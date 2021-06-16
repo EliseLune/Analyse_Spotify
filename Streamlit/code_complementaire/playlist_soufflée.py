@@ -36,8 +36,17 @@ def recommandation_souflee(playlist_id, audiofeatures,sp):
         n,m=df.shape
         if n!=0: #Si le dataframe est non vide après avoir éliminer les morceaux qui ne correspondent pas
             nouvelle_playlist.append(df["id"][0])
-    return list(set(nouvelle_playlist))
+    nouvelle_playlist = drop_doubles(nouvelle_playlist)
+    return nouvelle_playlist
 
 #Renvoie une partie de paylist_cible avec seulement les morceaux de l'artiste demandé
 def all_tracks_of_one_artist(playlist_cible,artist):
     return playlist_cible[playlist_cible["artists"].str.contains(artist)]
+
+#on enlève les morceaux en double mais on garde l'ordre
+def drop_doubles(playlist):
+    res=[]
+    for x in playlist:
+        if x not in res:
+            res.append(x)
+    return res
