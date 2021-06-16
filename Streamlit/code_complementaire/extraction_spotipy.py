@@ -5,7 +5,7 @@ import numpy as np
 import json
 import streamlit as st
 
-
+#Récupère tous les ID des morceaux d'une playlist
 def getTrackIDs(playlist_id,sp):
     ids = []
     playlist = sp.playlist(playlist_id)
@@ -13,6 +13,7 @@ def getTrackIDs(playlist_id,sp):
         ids.append(item["track"]['id'])
     return ids
 
+#Récupère les audiofeatures d'un morceau à partir de son ID
 def getTrackFeatures(id,sp):
     meta = sp.track(id)
     features = sp.audio_features(id)
@@ -35,7 +36,7 @@ def getTrackFeatures(id,sp):
              features[0]['time_signature'], 
              features[0]['valence']]
 
-
+#Créé un dataframe des audiofeatures d'une playlist à partie de son ID
 def creat_df_audiofeatures(playlist_id,sp):
     ids = getTrackIDs(playlist_id,sp)
     tracks = []
@@ -43,7 +44,9 @@ def creat_df_audiofeatures(playlist_id,sp):
         track = getTrackFeatures(ids[i],sp)
         tracks.append(track)
     return pd.DataFrame(tracks, columns = ['id','name', 'album', 'artist', 'release_date', 'length', 'popularity', 'acousticness', 'danceability', 'energy', 'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'time_signature','valence'])
-    
+
+#Récupère les playlists (publiques!) d'un utilisateur avec son ID
+# Plus utilisé dans cette version du code    
 def get_playlist_id(user_id,sp):
     playlists = sp.user_playlists(user_id)
     res=[]
@@ -60,9 +63,7 @@ def get_playlist_id(user_id,sp):
             playlists = None
     return res
 
-# results = spotify.user_playlist(user=None, playlist_id="3cqDkXVInhOYPpJyVzvwux", fields="name")
-# results["name"]
-
+#Crée 2 listes avec les noms et les ID de toutes les playlists de l'utilisateur (privés et publiques)
 def get_playlists(items):
     name_playlists= []
     id_playlists=[]
@@ -71,11 +72,12 @@ def get_playlists(items):
         id_playlists.append(dict["id"])
     return name_playlists,id_playlists
 
+#A partir du nom de la playlist, donne l'ID de la playlist. A besoin des 2 listes de la fonction précédente
 def name_to_id(names,ids,name_to_search):
     numero = names.index(name_to_search)
     return ids[numero]
 
-
+#Liste d'ID recommandés avec l'outil recommandation de spotipy
 def premiere_recommandation(playlist_id,sp):
     tracks = getTrackIDs(playlist_id,sp)
     reco = []
@@ -85,6 +87,7 @@ def premiere_recommandation(playlist_id,sp):
         reco.append(res["tracks"][0]["id"])
     return reco
 
+#Enumère les artistes d'un morceau sous forme d'un string
 def get_artists(track_id,sp):
     liste_artists = sp.track(track_id)["artists"]
     res= []
@@ -96,6 +99,7 @@ def get_artists(track_id,sp):
     str = str + res[-1]
     return str
 
+#Utilise première recommandation pour retourné un dataframe des morceaux recommandés
 def mise_en_forme(id_to_change,sp):
     res = premiere_recommandation(id_to_change,sp)
     names = [sp.track(trackie)["name"] for trackie in res]
@@ -104,6 +108,7 @@ def mise_en_forme(id_to_change,sp):
             'Album':[sp.track(trackie)["album"]["name"] for trackie in res],
             'TrackId':res,}
 
+#Retourne une liste avec tous les ID différents de l'utilisateur
 def all_tracks(playlists,sp):
     all_tracks=[]
     for playlist in playlists:
@@ -111,12 +116,7 @@ def all_tracks(playlists,sp):
         all_tracks = all_tracks + tracks
     return list(set(all_tracks))
 
-def liste_playlists_id(truc,sp):
-    res=[]
-    for dico in truc["items"]:
-        res.append(dico["id"])
-    return res
-
+#Liste de tous les ID des artistes différents
 def all_artists(playlists,sp):
     res=[]
     for playlist in playlists:
@@ -127,7 +127,8 @@ def all_artists(playlists,sp):
                 res.append(artist["id"])
     return list(set(res))
 
-def artists_to_list(top_artists):
+#Enumere les top artistes de l'utilisateur
+def top_artist_to_string(top_artists):
     tutu=top_artists["items"]
     res=""
     for artist in tutu[:-1]:
