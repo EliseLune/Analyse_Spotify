@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
+import streamlit as st
 
 def create_work():
     """Create a dataframe containing all audio-features, plus popularity"""
@@ -38,25 +39,29 @@ def gen_tags(audio_feat, playlist):
     return playlist2
 
 #Test de laffichage dun graphique avec un playlist:
-def test_plotly(data_csv,liste_feat):
-    data=pd.read_csv(data_csv)
-#     data["release_year"]=date_to_year(data['release_date'])
-#     y = data['release_year'].value_counts()
-    tab_aufe = create_work()
-    tab_tags = gen_tags(tab_aufe, data)
+def gen_hists(dataPL,liste_feat, tabAF):
+    tabTags = gen_tags(tabAF, dataPL)
     for aud_feat in liste_feat:
         #On peut faire une boucle for pour afficher les graphs de tous les audiofeatures sélectionnés
         #Et faire des if pour afficher un type de graph différent selon l'audiofeature?
         if aud_feat=='release_year':
-            fig = px.histogram(playlist, x='release_date')
+            fig = px.histogram(dataPL, x='release_date')
             fig.update_layout(
-                title=aud_feat,
+                title="Année de sortie",
             )
-            st.plotly_chart(fig = fig)
+            st.plotly_chart(fig)
         else:
-            fig = ff.create_distplot([data[aud_feat]], [aud_feat], bin_size=0.1, show_rug=False)
+            # if aud_feat=='popularity':
+            #     binsize, eten = 10, [0,100]
+            # else :
+            #     binsize, eten = 0.75, [0,1.]
+            # fig = ff.create_distplot([dataPL[aud_feat]], [aud_feat], bin_size=binsize, show_rug=False)
+            # fig.update_xaxes(range=eten)
+            fig = px.histogram(dataPL, x=[aud_feat],
+                barmode='overlay',
+                opacity=0.5)
             fig.update_layout(
-                title = aud_feat + " : " + tab_tags.loc[aud_feat, 'tags']
+                title = tabTags.loc[aud_feat, 'name'] + " : " + tabTags.loc[aud_feat, 'tag']
             )
-            st.ploty_chart(fig = fig)
-    return None
+            st.plotly_chart(fig)
+    return tabTags

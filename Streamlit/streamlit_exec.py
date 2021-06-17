@@ -1,17 +1,18 @@
 import streamlit as st
-import matplotlib.pyplot as plt
+from streamlit import caching
+import numpy as np
 import pandas as pd
-from streamlit_une_page import MultiApp
 import os
-from spotipy.oauth2 import SpotifyOAuth
 import spotipy
+
+from streamlit_une_page import MultiApp
+from spotipy.oauth2 import SpotifyOAuth
 from spotipy.cache_handler import CacheHandler
 from data_collector.secrets_spotify import client_id,client_secret,redirect_uri
 from data_collector.spotify_connector import get_spotipy
-from streamlit import caching
-import numpy as np
 from code_complementaire.extraction_spotipy import *
 from code_complementaire.playlist_soufflée import *
+from code_complementaire.analyses import *
 
 @st.cache(allow_output_mutation=True)
 def get_spotipy_ready():
@@ -122,14 +123,25 @@ def analyse():
     sp = get_spotipy_ready()
     playlists = sp.current_user_playlists()
     name_playlists, id_playlists = get_playlists(playlists["items"])
+    
     st.title('SpotData')
     st.header('Analyse de vos playlists')
-    st.write('Nombre dans la playlist+durée d\'écoute totale')
+    
+    crtPlaylist=st.selectbox('Vos playlists: ',name_playlists)
+    # crtPlaylist=st.selectbox('Vos playlists: ',['Select']+name_playlists)
+    crtId = name_to_id(name_playlists, id_playlists, crtPlaylist)
+    dataPL = creat_df_audiofeatures(crtId, sp)
+    tabAF = create_work()
+    totTime = dataPL['length'].sum()//1000  # en secondes
+    st.write('Nombre de pistes : {}'.format(dataPL.shape[0]))
+    st.write('Durée d\'écoute totale : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
+    
     st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
-    box=st.selectbox('Vos playlists: ',name_playlists)
-    a=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','release_year','valence'])
-    if a!=[]:
-        test_data('df_example_01-Copy1.csv',a)
+    
+    a=st.multiselect('Audio-Features',['acousticness','danceability','energy','instrumentalness','liveness','popularity','release_year','speechiness','valence'])
+    if crtPlaylist!='Select' and a!=[]:
+        # test_plotly('df_example_01-Copy1.csv',a)
+        tabTags = gen_hists(dataPL, a, tabAF)
     #if a!=[]:
         #st.subheader('Vous avez choisi: **{}**'.format(a))
         #l=len(a)
@@ -273,7 +285,7 @@ def glossaire():
     st.write("La liveness permet de détecter la présence d'une audience dans l'enregistrement. Plus l'indice est proche de 1, plus il est probable que le morceau est live. Au dessus de 0.8, il est quasiment certain que l'enregistrement a été fait en live.")
     st.markdown("___Loudness___")
     st.write("Le bruit est le seul paramètre qui n'est pas mesuré entre 0 et 1 mais sur une échelle de -60 dB à 0dB. Cette mesure est moyennée sur l'ensemble.")
-    st.markdown("___Speechness___")
+    st.markdown("___Speechiness___")
     st.write("Cet indice détecte la présence de parties parlées. Les enregistrements parlés (type poèmes, talk show, podcast) seront proche de 1. Au dessus de 0.66, l'enregistrement est probablement entièrement consitué de paroles. Entre 0.33 et 0.66, il y aura des paroles et de la musique, soit en alternance ou dans les cas comme le rap. En dessous de 0.33, il est probable que l'enregistrement soit de la musique, sans parties parlées.")
     st.markdown("___Valence___")
     st.write("Plus la valence est haute, plus le morceau est joyeux. A l'inverse, plus la valence est faible, plus le morceau est triste.")
@@ -294,7 +306,7 @@ def apropos():
 app = MultiApp()
 app.add_app("Se déconnecter", accueil)
 app.add_app("Accueil", apres_auth)
-app.add_app("Analyse", analyse)
+app.add_app("Analyses", analyse)
 app.add_app("Recommandations", recommandation)
 app.add_app("Glossaire",glossaire)
 app.add_app("A propos",apropos)
