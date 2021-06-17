@@ -1,5 +1,5 @@
-Audio-features,Name,Description,Intervalles,Tags,A analyser
-acousticsness,Acoustique,Décrit dans quelle proportion la piste est produite par des instruments acoustiques. 0 = électro | 1 = Vivaldi,"[0, 0.25, 0.5, 0.75, 1]","['Synthétisé', 'Plutôt synthétisé', 'Plutôt acoustique', 'Acoustique']",True
+audio-features,name,description,intervals,tags,to analyse
+acousticness,Acoustique,Décrit dans quelle proportion la piste est produite par des instruments acoustiques. 0 = électro | 1 = Vivaldi,"[0, 0.25, 0.5, 0.75, 1]","['Synthétique', 'Plutôt synthétique', 'Plutôt acoustique', 'Acoustique']",True
 danceability,Dansabilité,Décrit à quel point il est possible de danser sur la piste. 0 = émission radio | 1 = musique de boîte,"[0, 0.33, 0.66, 1]","['Calme', 'De quoi battre le rythme', 'Très dansant']",True
 energy,Energie,"Décrit dans quelle mesure la piste est intense, active. 0 = prélude de Bach | 1 = death metal","[0, 0.33, 0.66, 1]","['Doux', 'Moyen', 'Energique']",True
 instrumentalness,Insturmentalité,"Décrit dans quelle proportion on entend des voix (paroles de chant, parlées) dans la piste. 0 = rap pur | 1 = pièce pour piano","[0, 0.5, 0.75, 1]","['Majorité de paroles', 'Majorité instrumentale', 'Instrumental pur']",True
@@ -10,4 +10,4 @@ mode,Mode,Donne le mode (majeur/mineur) de la piste. 0 = mineur ; 1 = majeur,,,F
 speechiness,Parler,Décrit dans quelle mesure la piste contient des paroles parlées. 0 = musique pure | 1 = podcast,"[0, 0.33, 0.66, 1]","['Musical', 'Mélange discours et musique', 'Discours pur']",True
 tempo,Tempo,Donne le tempo de la piste en battementss par minute (BPM).,,,False
 valence,Jovialité,Décrit la positivité communiquée par la piste. 0 = Sound of Silence | 1 = Happy,"[0, 0.25, 0.5, 0.75, 1]","['Très sombre', 'Plutôt sombre', 'Plutôt léger', 'Joyeux']",True
-popularity,Popularité,"Décrit l'étendue du public que la piste, et comment elle y est appréciée","[0, 0.33, 0.66, 1]","['Peu connu', 'Relativement connu', 'Populaire']",True
+popularity,Popularité,"Décrit l'étendue du public que la piste, et comment elle y est appréciée","[0, 33, 66, 100]","['Peu connu', 'Relativement connu', 'Populaire']",True
