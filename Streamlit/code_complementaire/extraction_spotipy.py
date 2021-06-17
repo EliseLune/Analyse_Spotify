@@ -136,6 +136,34 @@ def top_artist_to_string(top_artists):
     res = res + tutu[-1]["name"]
     return res
 
+#Associe l'abréviation du pays à son nom complet
+def country(string):
+    countries = {"AD": "Andorre", "AE": "Emirats Arabes Unis" , "AR" : "Argentine","AT": "Autriche", "AU": "Australie",
+    "BE": "Belgique","BG": "Bulgarie","BH": "Barhain","BO": "Bolivie","BR": "Brésil","CA": "Canada","CH": "Suisse","CL": "Chili",
+    "CO": "Colombie","CR": "Costa Rica","CY": "Chypre","CZ": "République Tchèque","DE": "Allemagne","DK": "Danemark","DO": "République Dominicaine","DZ": "Algérie",
+    "EC": "Equateur","EE": "Estonie","EG": "Egypte","ES": "Espagne","FI": "Finland","FR": "France","GB": "Royaume Uni","GR": "Grèce",
+    "GT": "Guatemala","HK": "Hong Kong","HN": "Honduras","HU": "Hongrie","ID": "Indonésie","IE": "Irlande","IL": "Israël","IN": "Inde","IS": "Islande",
+    "IT": "Italie","JO": "Jordanie","JP": "Japon","KW": "Koweït","LB": "Liban","LI": "Liechtenstein","LT": "Lituanie","LU": "Luxembourg","LV": "Lettonie",
+    "MA": "Maroc","MC": "Monaco","MT": "Malte","MX": "Mexique","MY": "Malaisie","NI": "Nicaragua","NL": "Pays-Bas","NO": "Norvège","NZ": "Nouvelle-Zélande",
+    "OM": "Oman","PA": "Panama","PE": "Pérou","PH": "Philippines","PL": "Pologne","PS": "Palestine",
+    "PT": "Portugal","PY": "Paraguay","QA": "Qatar","RO": "Roumanie","SA": "Arabie Saoudite","SE": "Suède",
+    "SG": "Singapour","SK": "Slovaquie","SV": "El Salvador","TH": "Thaïlande","TN": "Tunisie","TR": "Turquie",
+    "TW": "Taïwan","US": "États-Unis","UY": "Uruguay","VN": "Viet Nam","ZA": "Afrique du Sud",
+    "RU":"Russie","BY":"Bélarus","KZ":"Kazakhstan","MD":"Moldavie","UA":"Ukraine","AL":"Albanie","BA":"Bosnie-Herzégovine",
+    "HR":"Croatie","ME":"Monténégro","MK":"Macédoine du Nord","SM":"Saint-Marin","RS":"Serbie","SI":"Slovénie","XK":"Kosovo",
+    "GY":"Guyana","SR":"Suriname","FJ":"Fiji","KI":"Kiribati","MH":"Iles Marshall","FM":"Micronésie","NR":"Nauru",
+    "PW":"Palaos","PG":"Papouasie-Nouvelle-Guinée","WS":"Samoa","SB":"Iles Salomon","TV":"Tuvalu","VU":"Vanuatu",
+    "AG":"Antigua-et-Barduba","BS":"Bahamas","BB":"Barbade","BZ":"Belize","CW":"Curaçao","DM":"Dominique","GD":"Grenade",
+    "JM":"Jamaïque","KN":"Saint-Kitts-et-Nevis","LC":"Saint Lucie","VC":"Saint-Vincent-et-les-Grenadines","TT":"Trinité-et-Tobago","AO":"Angola","BJ":"Benin",
+    "BW":"Botswana","BF":"Burkina Faso","BI":"Burundi","CM":"Cameroun","CV":"Cap-Vert","TD":"Tchad","KM":"Comores",
+    "CI":"Côte d'Ivoire","DJ":"Djibouti","GQ":"Guinée Equatoriale","SZ":"Eswatini","GA":"Gabon","GM":"Gambie","GH":"Ghana",
+    "GN":"Guinée","GW":"Guinée-Biseau","KE":"Kenya","LS":"Lesotho","LR":"Libéria","MG":"Madagascar","MW":"Malawi","TO":"Tonga",
+    "ML":"Mali","MR":"Mauritanie","MU":"Maurice","MZ":"Mozambique","NA":"Namibie","NE":"Niger","NG":"Nigeria","RW":"Rwanda","ST":"São Tomé-et-Principe","SN":"Sénégal",
+    "SC":"Seychelles","SL":"Sierra Leone","TZ":"Tanzanie","TG":"Togo","UG":"Ouganda","ZM":"Zambie","ZW":"Zimbabwe","AM":"Arménie","AZ":"Azebaïdjan",
+    "BD":"Bangladesh","BT":"Bhoutan","BN":"Brunei","KH":"Cambodge","GE":"Géorgie","KG":"Kirgizistan","LA":"Laos","MO":"Macao","MV":"Maldives",
+    "MN":"Mongolie","NP":"Nepal","PK":"Pakistan","KR":"Corée du Sud","LK":"Sri Lanka","TL":"Timor Oriental","UZ":"Ouzbékistan"}
+    return countries[string]
+
 #une autre possibilité de recommandation
 #set = mise_en_forme(id_to_change,sp)
 #n=len(set["Track"])

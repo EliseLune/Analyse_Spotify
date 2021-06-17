@@ -93,7 +93,7 @@ def apres_auth():
     if user_info["email"]!=[]: #email
         st.write("E-mail : {}".format(user_info["email"]))
     if user_info["country"]!=[]: #pays
-        st.write("Pays : {}".format(user_info["country"]))
+        st.write("Pays : {}".format(country(user_info["country"])))
 
     #Récupération des playlists ey de leur ID
     name_playlists, playlists = get_playlists(sp.current_user_playlists()["items"])
