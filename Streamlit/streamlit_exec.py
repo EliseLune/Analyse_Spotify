@@ -10,11 +10,13 @@ from data_collector.secrets_spotify import client_id,client_secret,redirect_uri
 from data_collector.spotify_connector import get_spotipy
 from streamlit import caching
 import numpy as np
-from analyse import *
+from code_complementaire.extraction_spotipy import *
+from code_complementaire.playlist_soufflée import *
 
 @st.cache(allow_output_mutation=True)
 def get_spotipy_ready():
-    sp = get_spotipy("playlist-read-private user-read-email user-read-private", client_id,client_secret,redirect_uri)
+    scope = "playlist-read-private user-read-email user-read-private playlist-modify-private user-top-read"
+    sp = get_spotipy(scope, client_id,client_secret,redirect_uri)
     res=sp.current_user
     return sp
 
@@ -44,12 +46,16 @@ def test_data(data_csv,liste_feat):
         if aud_feat=='release_year':
             fig2,ax2=plt.subplots()
             ax2.bar(y.index,y)
-            ax2.set_title('release_date')
+            ax2.set_title('Release date')
+            ax2.set_xlabel('Release date')
+            ax2.set_ylabel('Number of tracks')
             st.pyplot(fig2)
         else:
             fig1,ax1=plt.subplots()
             ax1.hist(data[aud_feat])
             ax1.set_title(aud_feat)
+            ax1.set_xlabel(aud_feat)
+            ax1.set_ylabel('Number of tracks')
             st.pyplot(fig1)
     return None
 
@@ -60,7 +66,7 @@ date_to_year = np.vectorize(date_to_year)
 def accueil():
     caching.clear_cache()
     st.title('SpotData')
-    st.write('Par P.Vehrlé, J.Delaplace, C.Nothhelfer, E.Lei')
+    st.write('Par J.Delaplace, E.Lei, C.Nothhelfer, P.Vehrlé')
     st.write('SpotData est une Webapp vous proposant de faire analyser vos playlists Spotify, et de découvrir encore plus de musiques qui vous correspondent.')
     st.write("Vous allez être redirigé vers une page d'autentification. Une fois cette dernière finie, revenez sur cette page")
     textPlaceholder = st.empty()
@@ -72,33 +78,47 @@ def accueil():
     return None
 
 def apres_auth():
-    st.title('SpotData')
+    #Récupération des informations de l'utilisateur
     sp = get_spotipy_ready()
     user_info = sp.current_user()
+
+    st.title('SpotData')
     st.header("Bienvenue, {}".format(user_info['display_name']))
     # st.image('Desktop/spotify_profil_mockup.png')
 
+    #Affichage des informations des l'utilisatuer (si elles existent)
     st.subheader('Mes informations')
-    if user_info["images"]!=[]:
+    if user_info["images"]!=[]: #photo
         st.image(user_info["images"][0]["url"])
-    if user_info["email"]!=[]:
+    if user_info["email"]!=[]: #email
         st.write("E-mail : {}".format(user_info["email"]))
-    if user_info["country"]!=[]:
-        st.write("Pays : {}".format(user_info["country"]))
+    if user_info["country"]!=[]: #pays
+        st.write("Pays : {}".format(country(user_info["country"])))
 
-    playlists = sp.current_user_playlists()
+    #Récupération des playlists ey de leur ID
+    name_playlists, playlists = get_playlists(sp.current_user_playlists()["items"])
     st.subheader('Pour commencer, une vision d\'ensemble de votre musique')
-    st.write('Statistiques globales:')
-    st.write('  - Nombre de playlists : {}'.format(len(playlists["items"])))
-    st.write('  - Nombre de titres enregistrés')
-    st.write('  - Nombre d\'artistes écoutés')
-    st.write('Top 5 des artistes écoutés')
-    st.write('Musique la plus écoutée:')
+    
+    #Affichage des statistiques golbales
+    st.write('Statistiques globales :')
+    st.write('  - Nombre de playlists : {}'.format(len(playlists)))
+    st.write('  - Nombre de titres enregistrés : {}'.format(len(all_tracks(playlists,sp))))
+    st.write('  - Nombre d\'artistes écoutés : {}'.format(len(all_artists(playlists,sp))))
+    
+    top_artists = sp.current_user_top_artists(limit=5)
+    if top_artists["total"]!=0: #On n'affiche pas les top artistes si l'utilisateur n'en a pas
+        st.write('  - Artistes les plus écoutés : {}'.format(top_artist_to_string(top_artists)))
+    
+    top_tracks = sp.current_user_top_tracks(limit=1)
+    if top_tracks["total"]!=0:
+        st.write('  - Musique la plus écoutée : {}'.format(top_tracks["items"][0]["name"]))
+    
+    #Analyse rapide de l'ensemble de la musique
     st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')
     return None
 
 
-def graph():
+def analyse():
     sp = get_spotipy_ready()
     playlists = sp.current_user_playlists()
     name_playlists, id_playlists = get_playlists(playlists["items"])
@@ -107,7 +127,7 @@ def graph():
     st.write('Nombre dans la playlist+durée d\'écoute totale')
     st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
     box=st.selectbox('Vos playlists: ',name_playlists)
-    a=st.multiselect('Audio-Features',['dansability','energy','speechiness','acousticness','instrumentalness','popularity','release_year','valence'])
+    a=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','release_year','valence'])
     if a!=[]:
         test_data('df_example_01-Copy1.csv',a)
     #if a!=[]:
@@ -143,22 +163,68 @@ def graph():
             #st.pyplot(fig)  
     return None
 
-def playlist():
+def recommandation():
+    #Récupération des noms de playlists et de leur ID
     sp = get_spotipy_ready()
     playlists = sp.current_user_playlists()
     name_playlists, id_playlists = get_playlists(playlists["items"])
     st.title('SpotData')
     st.header('Recommandation de playlists')
     st.subheader('A partir de vos playlists, nous vous en proposons des nouvelles, de plusieurs manières différentes.')
+
+    #Choix de la playlist
     st.subheader('A partir de quelle playlist souhaitez-vous en obtenir une nouvelle?')
-    b=st.selectbox('Vos playlists: ',name_playlists)
-    st.write('Pour l\'instant, 1 seul type de recommandations')
-    data={'Track':['Track 1','Track 2','...'],
-            'Artist':['Artist 1','Artist 2','...'],
-            'Album':['Album 1','Album 2','...'],
-            'TrackId':['TrackId 1','TrackId 2','...'],}
-    pd_data=pd.DataFrame(data)
-    st.dataframe(pd_data)
+    playlist_to_change=st.selectbox('Vos playlists: ',['<select>']+name_playlists)
+    if playlist_to_change!='<select>': #Une playlist a été selectionnée
+
+        #On récupère l'ID de la playlist à changer
+        id_to_change=name_to_id(name_playlists,id_playlists,playlist_to_change)
+        # st.dataframe(creat_df_audiofeatures(id_to_change,sp))
+
+        st.subheader("Choississez des audiofeatures à garder similaires dans la nouvelle playlist")
+        st.write("N'en choissiez pas trop, la recommendation serait bien plus compliquée !")
+        audiofeatures_chosen=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','valence'])
+        if audiofeatures_chosen!=[]: #Des audiofeatures ont été choisits
+
+            #On a la playlist recommandée
+            nouvelle_playlist = recommandation_souflee(id_to_change,audiofeatures_chosen,sp)
+            
+            #Affichage des morceaux recommandés
+            st.subheader('Voici les morceaux que vous nous recommendons.')
+            names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
+            df = {'Track':names,
+            'Artist':[get_artists(trackie,sp) for trackie in nouvelle_playlist],
+            'Album':[sp.track(trackie)["album"]["name"] for trackie in nouvelle_playlist],
+            'TrackId':nouvelle_playlist,}
+            n=len(df["Track"])
+            st.dataframe(df, height=30*(n+1))
+
+        # data={'Track':['Track 1','Track 2','...'],
+                # 'Artist':['Artist 1','Artist 2','...'],
+                # 'Album':['Album 1','Album 2','...'],
+                # 'TrackId':['TrackId 1','TrackId 2','...'],}
+        # pd_data=pd.DataFrame(data)
+        # st.dataframe(pd_data)
+        
+            st.write("Certains artistes n'existent pas dans notre base de données. Peut-être que s'il n'y a pas assez de morceaux on peut utiliser la recommandatoin Spotify.")
+
+            # Création de la playlist sur Spotify. On commence par choisir le nom
+            st.subheader("Notre proposition vous plaît? Ajouter cette nouvelle playlist sur Spotify !")
+            nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
+            textPlaceholder = st.empty()
+            click = textPlaceholder.button("Ajouter cette playlist dans Spotify")
+
+            if click:
+                textPlaceholder.text("Votre playlist a bien été créée. Allez sur Spotify pour l'écouter.")
+                user_info = sp.current_user()
+
+                #On crée la nouvelle playlist
+                new_playlist = sp.user_playlist_create(user_info["id"],nom_playlist, public=False)
+                new_playlist_id = new_playlist["id"]
+
+                #On ajoute les morceaux recommandés à la nouvelle playlist
+                sp.user_playlist_add_tracks(user_info["id"], new_playlist_id, nouvelle_playlist)
+
     #LA SUITE SERVIRA PEUT-ÊTRE PLUS TARD
     #if b=='Playlist sur critères':
         #c=st.multiselect('Critères choisis: ',['Dansabilité','Energie','Speechiness','Tempo','Valence'])
@@ -212,22 +278,24 @@ def glossaire():
     st.markdown("___Valence___")
     st.write("Plus la valence est haute, plus le morceau est joyeux. A l'inverse, plus la valence est faible, plus le morceau est triste.")
 
-    st.table(pd_gloss)
+    st.subheader("Pour avoir plus d'information,")
+    st.write("[Visitez ce site](https://rpubs.com/PeterDola/SpotifyTracks)")
+    # st.table(pd_gloss)
     return None
 
 def apropos():
     st.title('SpotData')
     st.header('A propos')
-    st.write('SpotData est une WebApp développée par 4 élèves de l\'école Mines Paristech (nos noms) dans le cadre d\'un projet d\'informatique.')
-    st.write('Le but est d\'analyser des playlists Spotify et de proposer des recommandations grâce au module python Spotipy')
-    st.write('Lien du dépot Github du projet:')
-    st.write('Lien du site des Mines:')
+    st.write('SpotData est une WebApp développée par 4 élèves de l\'école Mines Paristech (J.Delaplace, E.Lei, C.Nothhelfer, P.Vehrlé) dans le cadre d\'un projet d\'informatique.')
+    st.write("Le but est d\'analyser des playlists Spotify et de proposer des recommandations grâce au module python Spotipy. Cette application est développée avec Streamlit.")
+    st.write('[Dépot Github du projet](https://github.com/EliseLune/Analyse_Spotify)')
+    st.write('[Site des Mines](https://www.minesparis.psl.eu/)')
     return None
 app = MultiApp()
 app.add_app("Se déconnecter", accueil)
 app.add_app("Accueil", apres_auth)
-app.add_app("Mes Graphiques", graph)
-app.add_app("Recommandations", playlist)
+app.add_app("Analyse", analyse)
+app.add_app("Recommandations", recommandation)
 app.add_app("Glossaire",glossaire)
 app.add_app("A propos",apropos)
 app.run()
