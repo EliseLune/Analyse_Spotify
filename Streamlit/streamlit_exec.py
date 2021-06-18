@@ -1,17 +1,19 @@
 import streamlit as st
-import matplotlib.pyplot as plt
+from streamlit import caching
+import numpy as np
 import pandas as pd
-from streamlit_une_page import MultiApp
 import os
-from spotipy.oauth2 import SpotifyOAuth
 import spotipy
+import matplotlib.pyplot as plt
+
+from streamlit_une_page import MultiApp
+from spotipy.oauth2 import SpotifyOAuth
 from spotipy.cache_handler import CacheHandler
 from data_collector.secrets_spotify import client_id,client_secret,redirect_uri
 from data_collector.spotify_connector import get_spotipy
-from streamlit import caching
-import numpy as np
 from code_complementaire.extraction_spotipy import *
 from code_complementaire.playlist_soufflée import *
+from code_complementaire.analyses import *
 
 @st.cache(allow_output_mutation=True)
 def get_spotipy_ready():
@@ -100,7 +102,6 @@ def apres_auth():
     st.subheader('Pour commencer, une vision d\'ensemble de votre musique')
     
     #Affichage des statistiques golbales
-    st.write('Statistiques globales :')
     st.write('  - Nombre de playlists : {}'.format(len(playlists)))
     st.write('  - Nombre de titres enregistrés : {}'.format(len(all_tracks(playlists,sp))))
     st.write('  - Nombre d\'artistes écoutés : {}'.format(len(all_artists(playlists,sp))))
@@ -111,7 +112,7 @@ def apres_auth():
     
     top_tracks = sp.current_user_top_tracks(limit=1)
     if top_tracks["total"]!=0:
-        st.write('  - Musique la plus écoutée : {}'.format(top_tracks["items"][0]["name"]))
+        st.write('  - Titre le plus écouté : {}'.format(top_tracks["items"][0]["name"]))
     
     #Analyse rapide de l'ensemble de la musique
     st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')
@@ -122,14 +123,25 @@ def analyse():
     sp = get_spotipy_ready()
     playlists = sp.current_user_playlists()
     name_playlists, id_playlists = get_playlists(playlists["items"])
+    
     st.title('SpotData')
     st.header('Analyse de vos playlists')
-    st.write('Nombre dans la playlist+durée d\'écoute totale')
+    
+    crtPlaylist=st.selectbox('Vos playlists: ',name_playlists)
+    # crtPlaylist=st.selectbox('Vos playlists: ',['Select']+name_playlists)
+    crtId = name_to_id(name_playlists, id_playlists, crtPlaylist)
+    dataPL = creat_df_audiofeatures(crtId, sp)
+    tabAF = create_work()
+    totTime = dataPL['length'].sum()//1000  # en secondes
+    st.write('Nombre de pistes : {}'.format(dataPL.shape[0]))
+    st.write('Durée d\'écoute totale : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
+    
     st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
-    box=st.selectbox('Vos playlists: ',name_playlists)
-    a=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','release_year','valence'])
-    if a!=[]:
-        test_data('df_example_01-Copy1.csv',a)
+    
+    a=st.multiselect('Audio-Features',['acousticness','danceability','energy','instrumentalness','liveness','popularity','release_year','speechiness','valence'])
+    if crtPlaylist!='Select' and a!=[]:
+        # test_plotly('df_example_01-Copy1.csv',a)
+        tabTags = gen_hists(dataPL, a, tabAF)
     #if a!=[]:
         #st.subheader('Vous avez choisi: **{}**'.format(a))
         #l=len(a)
@@ -188,7 +200,7 @@ def recommandation():
 
             #On a la playlist recommandée
             nouvelle_playlist = recommandation_souflee(id_to_change,audiofeatures_chosen,sp)
-            
+
             #Affichage des morceaux recommandés
             st.subheader('Voici les morceaux que vous nous recommendons.')
             names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
@@ -198,6 +210,11 @@ def recommandation():
             'TrackId':nouvelle_playlist,}
             n=len(df["Track"])
             st.dataframe(df, height=30*(n+1))
+
+            #Comparaison avec la playlist initiales
+            st.write("La playlist initiale (pour info -> à enlever plus tard)")
+            source = creat_df_audiofeatures(id_to_change,sp)
+            st.dataframe(source[["name","artist","album","id"]], height=30*(n+1))
 
         # data={'Track':['Track 1','Track 2','...'],
                 # 'Artist':['Artist 1','Artist 2','...'],

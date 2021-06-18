@@ -25,17 +25,28 @@ def recommandation_souflee(playlist_id, audiofeatures,sp):
 
         #df est un dataframe avec seulemnt les morceaux de l'artiste en question
         df = all_tracks_of_one_artist(playlist_cible,artist)
-        
-        #Pour chaque audiofeature selectioné, on ne garde dans df que des morceaux similaires
+
+        #Pour chaque audiofeature selectioné, on ne garde dans df que des morceaux similaires 
         for j,audio in enumerate(audiofeatures):
-            df = df[(df[audio] > playlist[i][j+1] -0.1) & (df[audio] > playlist[i][j+1] -0.1)]
+                df = df[(df[audio] > playlist[i][j+1] -0.1) & (df[audio] < playlist[i][j+1] +0.1)]
+        
+        a,b=df.shape
+        st.write(a)
+        if a==0:#s'il n'y a aucun morceau qui correspond
+            other_artist = artist_similaire(source.iloc[i],audiofeatures,sp)
+            df = all_tracks_of_one_artist(playlist_cible,other_artist)
+            for j,audio in enumerate(audiofeatures):
+                df = df[(df[audio] > playlist[i][j+1] -0.1) & (df[audio] < playlist[i][j+1] +0.1)]
         
         #On reset les indices de df
         df.reset_index(drop=True, inplace=True)
 
         n,m=df.shape
-        if n!=0: #Si le dataframe est non vide après avoir éliminer les morceaux qui ne correspondent pas
-            nouvelle_playlist.append(df["id"][0])
+
+        for i in range(n):#on essaye au maximum de ne pas reprendre les mêmes morceaux
+            if not(df["id"][i] in nouvelle_playlist):
+                nouvelle_playlist.append(df["id"][i])
+                break
     nouvelle_playlist = drop_doubles(nouvelle_playlist)
     return nouvelle_playlist
 
@@ -50,3 +61,16 @@ def drop_doubles(playlist):
         if x not in res:
             res.append(x)
     return res
+
+def artist_similaire(track,audiofeatures,sp):
+    df_artists=pd.read_csv('data_by_artist_o.csv')
+    audiofeatures = ['danceability','energy','speechiness','acousticness','instrumentalness','valence']
+    for audio in audiofeatures:
+        df = df_artists[(df_artists[audio] > track[audio] -0.05) & (df_artists[audio] < track[audio] +0.05)]
+        a,b = df.shape
+        if a==0:
+            break
+        else:
+            df_artists=df
+    df_artists.reset_index(drop=True, inplace=True)
+    return df_artists["artists"][0]
