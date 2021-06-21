@@ -31,7 +31,6 @@ def recommandation_souflee(playlist_id, audiofeatures,sp):
                 df = df[(df[audio] > playlist[i][j+1] -0.1) & (df[audio] < playlist[i][j+1] +0.1)]
         
         a,b=df.shape
-        st.write(a)
         if a==0:#s'il n'y a aucun morceau qui correspond
             other_artist = artist_similaire(source.iloc[i],audiofeatures,sp)
             df = all_tracks_of_one_artist(playlist_cible,other_artist)
@@ -41,12 +40,8 @@ def recommandation_souflee(playlist_id, audiofeatures,sp):
         #On reset les indices de df
         df.reset_index(drop=True, inplace=True)
 
-        n,m=df.shape
-
-        for i in range(n):#on essaye au maximum de ne pas reprendre les mêmes morceaux
-            if not(df["id"][i] in nouvelle_playlist):
-                nouvelle_playlist.append(df["id"][i])
-                break
+        nouvelle_playlist.append(df["id"][0])
+        playlist_cible.drop(playlist_cible.loc[playlist_cible['id']==df["id"][0]].index, inplace=True)
     nouvelle_playlist = drop_doubles(nouvelle_playlist)
     return nouvelle_playlist
 
@@ -74,3 +69,31 @@ def artist_similaire(track,audiofeatures,sp):
             df_artists=df
     df_artists.reset_index(drop=True, inplace=True)
     return df_artists["artists"][0]
+
+def affichage_playlist(nouvelle_playlist,sp):
+    st.subheader('Voici les morceaux que vous nous recommendons.')
+    names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
+    df = {'Track':names,
+                'Artist':[get_artists(trackie,sp) for trackie in nouvelle_playlist],
+                'Album':[sp.track(trackie)["album"]["name"] for trackie in nouvelle_playlist],
+                'TrackId':nouvelle_playlist,}
+    n=len(df["Track"])
+    st.dataframe(df, height=30*(n+1))
+    return 0
+
+def ajout_playlist_sur_spotify(nouvell_playlist,sp,playlist_to_change):
+    st.subheader("Notre proposition vous plaît? Ajouter cette nouvelle playlist sur Spotify !")
+    nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
+    textPlaceholder = st.empty()
+    click = textPlaceholder.button("Ajouter cette playlist dans Spotify")
+
+    if click:
+        textPlaceholder.text("Votre playlist a bien été créée. Allez sur Spotify pour l'écouter.")
+        user_info = sp.current_user()
+
+        #On crée la nouvelle playlist
+        new_playlist = sp.user_playlist_create(user_info["id"],nom_playlist, public=False)
+        new_playlist_id = new_playlist["id"]
+
+        #On ajoute les morceaux recommandés à la nouvelle playlist
+        sp.user_playlist_add_tracks(user_info["id"], new_playlist_id, nouvelle_playlist)
