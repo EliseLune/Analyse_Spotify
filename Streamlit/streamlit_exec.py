@@ -12,7 +12,7 @@ from spotipy.cache_handler import CacheHandler
 from data_collector.secrets_spotify import client_id,client_secret,redirect_uri
 from data_collector.spotify_connector import get_spotipy
 from code_complementaire.extraction_spotipy import *
-from code_complementaire.playlist_soufflée import *
+from code_complementaire.playlist_soufflee import *
 from code_complementaire.analyses import *
 from code_complementaire.recommendatoin_annees import *
 from code_complementaire.nuage_artist import *
