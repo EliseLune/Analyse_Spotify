@@ -217,7 +217,7 @@ def recommandation():
             st.subheader("Choississez une année cible")
             year = st.text_input('Année choisie')
             nouvelle_playlist = recommendation_year(id_to_change,year,sp)
-            affichage_playlist_années(nouvelle_playlist,sp)
+            affichage_playlist_annees(nouvelle_playlist,sp)
             ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change)
         
         else:
