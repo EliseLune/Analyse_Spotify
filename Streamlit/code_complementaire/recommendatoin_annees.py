@@ -2,7 +2,7 @@ import pandas as pd
 from .extraction_spotipy import *
 import streamlit as sp
 
-def recommendation_year(id_to_change,year,sp):
+def recommendation_year(id_to_change,year,delta,sp):
 
     year = int(year)
 
@@ -27,7 +27,7 @@ def recommendation_year(id_to_change,year,sp):
     for track in playlist:
         
         #df est un dataframe avec seulemnt les morceaux de l'artiste en question
-        df = tracks_around_year(playlist_cible,year, 5)
+        df = tracks_around_year(playlist_cible,year, delta)
 
         for i in range(len(track) -1):
             df_verife = df[(df[audiofeatures[i]] > track[i+1] -0.1) & (df[audiofeatures[i]] < track[i+1] +0.1)]

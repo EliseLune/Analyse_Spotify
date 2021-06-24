@@ -73,12 +73,11 @@ def artist_similaire(track,audiofeatures,sp):
 def affichage_playlist(nouvelle_playlist,sp):
     st.subheader('Voici les morceaux que vous nous recommendons.')
     names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
-    df = {'Track':names,
+    df = pd.DataFrame({'Track':names,
                 'Artist':[get_artists(trackie,sp) for trackie in nouvelle_playlist],
-                'Album':[sp.track(trackie)["album"]["name"] for trackie in nouvelle_playlist],
-                'TrackId':nouvelle_playlist,}
-    n=len(df["Track"])
-    st.dataframe(df, height=30*(n+1))
+                'Album':[sp.track(trackie)["album"]["name"] for trackie in nouvelle_playlist],}, 
+                index = ["<img src={} height='25'>".format(sp.track(trackie)["album"]["images"][0]["url"]) for trackie in nouvelle_playlist])
+    st.write(df.to_html(escape=False), unsafe_allow_html=True)
     return 0
 
 def ajout_playlist_sur_spotify(nouvell_playlist,sp,playlist_to_change):
