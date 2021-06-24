@@ -105,7 +105,8 @@ def apres_auth():
     
     #Affichage des statistiques golbales
     st.write('  - Nombre de playlists : {}'.format(len(playlists)))
-    st.write('  - Nombre de titres enregistrés : {}'.format(len(all_tracks(playlists,sp))))
+    all_track = all_tracks(playlists,sp)
+    st.write('  - Nombre de titres enregistrés : {}'.format(len(all_track)))
     st.write('  - Nombre d\'artistes écoutés : {}'.format(len(all_artists(playlists,sp))))
     
     top_artists = sp.current_user_top_artists(limit=5)
@@ -118,6 +119,11 @@ def apres_auth():
     
     #Analyse rapide de l'ensemble de la musique
     st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')
+
+    # Bubble chart des artistes
+    # tutu = getTrackIDs('4pUzBoCxZzig6QncK4fcxD',sp)
+    # df = creat_chart(tutu,sp)
+    # st.dataframe(df)
     return None
 
 
@@ -215,7 +221,7 @@ def recommandation():
 
         elif recommandation_type=="Recommandation par années":
             st.subheader("Choississez une année cible")
-            year = st.text_input('Année choisie')
+            year = st.text_input('Année choisie', value="1970")
             nouvelle_playlist = recommendation_year(id_to_change,year,sp)
             affichage_playlist_années(nouvelle_playlist,sp)
             ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change)
@@ -223,7 +229,7 @@ def recommandation():
         else:
             st.subheader('Playlist soufflée')
             st.write("Pour chaque morceau de la playlist, ce type de recommendation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
-            st.subheader('Recommendation par pays')
+            st.subheader('Recommendation par années')
             st.write("Chaque morceau de la playlist sera remplacé par un morceau paru autour de la date selectionnée avec des audiofeatures similaires")
 
     #LA SUITE SERVIRA PEUT-ÊTRE PLUS TARD
