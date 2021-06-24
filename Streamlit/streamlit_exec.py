@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import os
 import spotipy
+import matplotlib.pyplot as plt
 
 from streamlit_une_page import MultiApp
 from spotipy.oauth2 import SpotifyOAuth
@@ -11,8 +12,10 @@ from spotipy.cache_handler import CacheHandler
 from data_collector.secrets_spotify import client_id,client_secret,redirect_uri
 from data_collector.spotify_connector import get_spotipy
 from code_complementaire.extraction_spotipy import *
-from code_complementaire.playlist_soufflée import *
+from code_complementaire.playlist_soufflee import *
 from code_complementaire.analyses import *
+from code_complementaire.recommendatoin_annees import *
+from code_complementaire.nuage_artist import *
 
 @st.cache(allow_output_mutation=True)
 def get_spotipy_ready():
@@ -101,9 +104,9 @@ def apres_auth():
     st.subheader('Pour commencer, une vision d\'ensemble de votre musique')
     
     #Affichage des statistiques golbales
-    st.write('Statistiques globales :')
     st.write('  - Nombre de playlists : {}'.format(len(playlists)))
-    st.write('  - Nombre de titres enregistrés : {}'.format(len(all_tracks(playlists,sp))))
+    all_track = all_tracks(playlists,sp)
+    st.write('  - Nombre de titres enregistrés : {}'.format(len(all_track)))
     st.write('  - Nombre d\'artistes écoutés : {}'.format(len(all_artists(playlists,sp))))
     
     top_artists = sp.current_user_top_artists(limit=5)
@@ -112,10 +115,15 @@ def apres_auth():
     
     top_tracks = sp.current_user_top_tracks(limit=1)
     if top_tracks["total"]!=0:
-        st.write('  - Musique la plus écoutée : {}'.format(top_tracks["items"][0]["name"]))
+        st.write('  - Titre le plus écouté : {}'.format(top_tracks["items"][0]["name"]))
     
     #Analyse rapide de l'ensemble de la musique
     st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')
+
+    # Bubble chart des artistes
+    # tutu = getTrackIDs('4pUzBoCxZzig6QncK4fcxD',sp)
+    # df = creat_chart(tutu,sp)
+    # st.dataframe(df)
     return None
 
 
@@ -135,7 +143,7 @@ def analyse():
     tabTags = gen_tags(tabAF, dataPL)
     totTime = dataPL['length'].sum()//1000  # en secondes
     st.write('Nombre de pistes : {}'.format(dataPL.shape[0]))
-    st.write('Durée d\'écoute totale : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
+    st.write('Durée d\'écoute totale (de la playlist plutôt ?): {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
     
     st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
     
@@ -192,51 +200,38 @@ def recommandation():
 
         #On récupère l'ID de la playlist à changer
         id_to_change=name_to_id(name_playlists,id_playlists,playlist_to_change)
-        # st.dataframe(creat_df_audiofeatures(id_to_change,sp))
-
-        st.subheader("Choississez des audiofeatures à garder similaires dans la nouvelle playlist")
-        st.write("N'en choissiez pas trop, la recommendation serait bien plus compliquée !")
-        audiofeatures_chosen=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','valence'])
-        if audiofeatures_chosen!=[]: #Des audiofeatures ont été choisits
-
-            #On a la playlist recommandée
-            nouvelle_playlist = recommandation_souflee(id_to_change,audiofeatures_chosen,sp)
-            
-            #Affichage des morceaux recommandés
-            st.subheader('Voici les morceaux que vous nous recommendons.')
-            names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
-            df = {'Track':names,
-            'Artist':[get_artists(trackie,sp) for trackie in nouvelle_playlist],
-            'Album':[sp.track(trackie)["album"]["name"] for trackie in nouvelle_playlist],
-            'TrackId':nouvelle_playlist,}
-            n=len(df["Track"])
-            st.dataframe(df, height=30*(n+1))
-
-        # data={'Track':['Track 1','Track 2','...'],
-                # 'Artist':['Artist 1','Artist 2','...'],
-                # 'Album':['Album 1','Album 2','...'],
-                # 'TrackId':['TrackId 1','TrackId 2','...'],}
-        # pd_data=pd.DataFrame(data)
-        # st.dataframe(pd_data)
         
-            st.write("Certains artistes n'existent pas dans notre base de données. Peut-être que s'il n'y a pas assez de morceaux on peut utiliser la recommandatoin Spotify.")
+        #Choix du type de recommandation
+        recommandation_type=st.selectbox('Quelle type de recommandation voulez-vous ?',['<select>',"Playlist soufflée", "Recommandation par années"])
+        
+        #recommendation de playlist soufflée
+        if recommandation_type=="Playlist soufflée":
+            st.subheader("Choississez des audiofeatures à garder similaires dans la nouvelle playlist")
+            st.write("N'en choissiez pas trop, la recommendation serait bien plus compliquée !")
+            audiofeatures_chosen=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','valence'])
+            if audiofeatures_chosen!=[]: #Des audiofeatures ont été choisits
 
-            # Création de la playlist sur Spotify. On commence par choisir le nom
-            st.subheader("Notre proposition vous plaît? Ajouter cette nouvelle playlist sur Spotify !")
-            nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
-            textPlaceholder = st.empty()
-            click = textPlaceholder.button("Ajouter cette playlist dans Spotify")
+                #On a la playlist recommandée
+                nouvelle_playlist = recommandation_souflee(id_to_change,audiofeatures_chosen,sp)
 
-            if click:
-                textPlaceholder.text("Votre playlist a bien été créée. Allez sur Spotify pour l'écouter.")
-                user_info = sp.current_user()
+                #Affichage des morceaux recommandés
+                affichage_playlist(nouvelle_playlist,sp)
 
-                #On crée la nouvelle playlist
-                new_playlist = sp.user_playlist_create(user_info["id"],nom_playlist, public=False)
-                new_playlist_id = new_playlist["id"]
+                # Création de la playlist sur Spotify. On commence par choisir le nom
+                ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change)
 
-                #On ajoute les morceaux recommandés à la nouvelle playlist
-                sp.user_playlist_add_tracks(user_info["id"], new_playlist_id, nouvelle_playlist)
+        elif recommandation_type=="Recommandation par années":
+            st.subheader("Choississez une année cible")
+            year = st.text_input('Année choisie', value="1970")
+            nouvelle_playlist = recommendation_year(id_to_change,year,sp)
+            affichage_playlist_annees(nouvelle_playlist,sp)
+            ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change)
+        
+        else:
+            st.subheader('Playlist soufflée')
+            st.write("Pour chaque morceau de la playlist, ce type de recommendation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
+            st.subheader('Recommendation par années')
+            st.write("Chaque morceau de la playlist sera remplacé par un morceau paru autour de la date selectionnée avec des audiofeatures similaires")
 
     #LA SUITE SERVIRA PEUT-ÊTRE PLUS TARD
     #if b=='Playlist sur critères':
@@ -313,7 +308,7 @@ def apropos():
 app = MultiApp()
 app.add_app("Se déconnecter", accueil)
 app.add_app("Accueil", apres_auth)
-app.add_app("Analyses", analyse)
+app.add_app("Analyse", analyse)
 app.add_app("Recommandations", recommandation)
 app.add_app("Glossaire",glossaire)
 app.add_app("A propos",apropos)
