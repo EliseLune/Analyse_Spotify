@@ -4,13 +4,36 @@ import plotly.express as px
 import plotly.figure_factory as ff
 import streamlit as st
 
+@st.cache
 def create_work():
     """Create a dataframe containing all audio-features, plus popularity"""
-    feat = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'valence', 'popularity']
-    name = ['Acoustique', 'Dansabilité', 'Energie', 'Insturmentalité', 'Tonalité', 'Live', 'Puissance acoustique', 'Mode', 'Parler', 'Tempo', 'Jovialité', 'Popularité']
-    desc = ["Décrit dans quelle proportion la piste est produite par des instruments acoustiques. 0 = électro | 1 = Vivaldi", "Décrit à quel point il est possible de danser sur la piste. 0 = émission radio | 1 = musique de boîte", "Décrit dans quelle mesure la piste est intense, active. 0 = prélude de Bach | 1 = death metal", "Décrit dans quelle proportion on entend des voix (paroles de chant, parlées) dans la piste. 0 = rap pur | 1 = pièce pour piano", "Donne la tonalité principale de la piste. 0 = Do, 1 = Do#, 2 = Ré, etc.", "Décrit si un public est présent. 0 = piste enregistré en studio | 1 = public qui chante avec l'artiste en concert", "Décrit à quel point la piste rend un son fort. -60 dB = ASMR | 0 dB = hard metal", "Donne le mode (majeur/mineur) de la piste. 0 = mineur ; 1 = majeur", "Décrit dans quelle mesure la piste contient des paroles parlées. 0 = musique pure | 1 = podcast", "Donne le tempo de la piste en battements par minute (BPM).", "Décrit la positivité communiquée par la piste. 0 = Sound of Silence | 1 = Happy", "Décrit l'étendue du public que la piste, et comment elle y est appréciée"]
+    feat = ['acousticness','danceability', 'energy', 'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'valence', 'popularity']
+    name = ['Acoustique', 'Dansabilité', 'Energie', 'Instrumentalité', 'Tonalité', 'Live', 'Puissance acoustique', 'Mode', 'Parler', 'Tempo', 'Jovialité', 'Popularité']
+    desc = ["L'acousticness mesure l'acoustique du morceau. Plus il est proche de 1, plus il y a de chance que le morceau soit acoustique (avec des instruments non synthétiques).",
+        "La dansabilité mesure si un morceau est adapté à la danse à partir d'élements musicaux comme le tempo, la stabilité du rythme, la force de la rythmique. A 0, un morceau est très peu adapté à la danse alors qu'à 1 est un morceau très dansable.",
+        "L'énergie mesure la perception de l'intensité et de l'activité. Typiquement, les morceaux énergiques semblent rapides, forts et bruyants. Par exemple, le death metal est à haute énergie alors qu'un prélude de Bach est bas dans cette échelle.",
+        "Cet indice mesure si un morceau contient des voix. Plus l'indice est proche de 1, plus il est certain qu'il n'y a aucune voix. Une valeur au dessus de 0.5 tend à être un morceau instrumental mais la probabilité augmente quand on s'approche de 1.",
+        "Tonalité principale de la piste. 0 = Do, 1 = Do#, 2 = Ré, etc.",
+        "La liveness permet de détecter la présence d'un public dans l'enregistrement. Plus l'indice est proche de 1, plus il est probable que le morceau est un live. Au dessus de 0.8, il est quasiment certain que l'enregistrement a été fait en live.",
+        "Ce paramètre décrit à quel point la piste rend un son fort, sur une échelle allant de -60 dB (= ASMR) à 0 dB (= hard metal)",
+        "Mode (majeur/mineur) de la piste. 0 = mineur ; 1 = majeur",
+        "Cet indice détecte la présence de parties parlées. Les enregistrements parlés (type poèmes, talk show, podcast) seront proches de 1. Au dessus de 0.66, l'enregistrement est probablement entièrement consitué de paroles. Entre 0.33 et 0.66, il y aura des paroles et de la musique, soit en alternance, soit en même temps comme le rap. En dessous de 0.33, il est probable que l'enregistrement soit de la musique, sans parties parlées.",
+        "Tempo de la piste en battements par minute (BPM)",
+        "Plus la valence est haute, plus le morceau est joyeux. A l'inverse, plus la valence est faible, plus le morceau est triste.",
+        "Cet indice mesure sur une échelle de 0 à 100 la notoriété de la piste."]
     inte = [[0, 0.25, 0.5, 0.75, 1], [0, 0.33, 0.66, 1], [0, 0.33, 0.66, 1], [0, 0.5, 0.75, 1], None, [0, 0.5, 0.8, 1], None, None, [0, 0.33, 0.66, 1], None, [0, 0.25, 0.5, 0.75, 1], [0, 33, 66, 100]]
-    tags = [['Synthétique', 'Plutôt synthétique', 'Plutôt acoustique', 'Acoustique'], ['Calme', 'De quoi battre le rythme', 'Très dansant'], ['Doux', 'Moyen', 'Energique'], ['Majorité de paroles', 'Majorité instrumentale', 'Instrumental pur'], None, ['Enregistrement studio', "Présence d'un petit public", 'Live'], None, None, ['Musical', 'Mélange discours et musique', 'Discours pur'], None, ['Très sombre', 'Plutôt sombre', 'Plutôt léger', 'Joyeux'], ['Peu connu', 'Relativement connu', 'Populaire']]
+    tags = [['Synthétique', 'Plutôt synthétique', 'Plutôt acoustique', 'Acoustique'],
+        ['Calme', 'De quoi battre le rythme', 'Très dansant'],
+        ['Doux', 'Moyen', 'Energique'],
+        ['Majorité de paroles', 'Majorité instrumentale', 'Instrumental pur'],
+        None,
+        ['Enregistrement studio', "Présence d'un petit public", 'Live'],
+        None,
+        None,
+        ['Musical', 'Mélange discours et musique', 'Discours pur'],
+        None,
+        ['Triste', 'Morose', 'Léger', 'Joyeux'],
+        ['Peu connu', 'Relativement connu', 'Populaire']]
     anly = [True, True, True, True, False, True, False, False, True, False, True, True]
     dict  = {'audio-features':feat, 'name':name, 'description':desc, 'intervals':inte, 'tags':tags, 'to analyse':anly}
     audio_feat = pd.DataFrame(dict).set_index('audio-features')
@@ -26,6 +49,7 @@ def tag(audio_feat, carac, moy):
         if moy < seuil :
             return audio_feat.loc[carac, "tags"][i-1]
 
+@st.cache
 def gen_tags(audio_feat, playlist):
     """Generate a dataframe specific to a playlist with tags and other statiscal information"""
     playlist2 = audio_feat.loc[:, 'name':'description'].copy()
@@ -38,9 +62,11 @@ def gen_tags(audio_feat, playlist):
         playlist2.loc[aud, 'st dev'] = playlist[aud].std()
     return playlist2
 
-#Test de laffichage dun graphique avec un playlist:
-def gen_hists(dataPL,liste_feat, tabAF):
-    tabTags = gen_tags(tabAF, dataPL)
+# def gen_wind_rose(dtaPL):
+#     fig = px.bar_polar(dataPL, )
+
+
+def gen_hists(dataPL,liste_feat, tabTags):
     for aud_feat in liste_feat:
         #On peut faire une boucle for pour afficher les graphs de tous les audiofeatures sélectionnés
         #Et faire des if pour afficher un type de graph différent selon l'audiofeature?
@@ -63,5 +89,6 @@ def gen_hists(dataPL,liste_feat, tabAF):
             fig.update_layout(
                 title = tabTags.loc[aud_feat, 'name'] + " : " + tabTags.loc[aud_feat, 'tag']
             )
+            fig.update_xaxes(title = tabTags.loc[aud_feat, 'name'])
+            fig.update_yaxes(title = 'Nombre de pistes')
             st.plotly_chart(fig)
-    return tabTags
