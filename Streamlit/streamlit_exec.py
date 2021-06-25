@@ -122,7 +122,6 @@ def apres_auth():
 
     # Bubble chart des artistes
     tutu = getTrackIDs('4pUzBoCxZzig6QncK4fcxD',sp)
-    st.write(sp.track(tutu[0]))
     df = creat_chart(tutu,sp)
     # st.dataframe(df)
     st.write(df.to_html(escape=False), unsafe_allow_html=True)
