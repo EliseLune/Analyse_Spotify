@@ -8,7 +8,7 @@ import streamlit as st
 def create_work():
     """Create a dataframe containing all audio-features, plus popularity"""
     feat = ['acousticness','danceability', 'energy', 'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'valence', 'popularity']
-    name = ['Acoustique', 'Dansabilité', 'Energie', 'Instrumentalité', 'Tonalité', 'Live', 'Puissance acoustique', 'Mode', 'Parler', 'Tempo', 'Jovialité', 'Popularité']
+    name = ['Acousticness', 'Danceability', 'Energy', 'Instrumentalness', 'Key', 'Liveness', 'Loudness', 'Mode', 'Speechiness', 'Tempo', 'Valence', 'Popularité']
     desc = ["L'acousticness mesure l'acoustique du morceau. Plus il est proche de 1, plus il y a de chance que le morceau soit acoustique (avec des instruments non synthétiques).",
         "La dansabilité mesure si un morceau est adapté à la danse à partir d'élements musicaux comme le tempo, la stabilité du rythme, la force de la rythmique. A 0, un morceau est très peu adapté à la danse alors qu'à 1 est un morceau très dansable.",
         "L'énergie mesure la perception de l'intensité et de l'activité. Typiquement, les morceaux énergiques semblent rapides, forts et bruyants. Par exemple, le death metal est à haute énergie alors qu'un prélude de Bach est bas dans cette échelle.",
@@ -34,7 +34,7 @@ def create_work():
         None,
         ['Triste', 'Morose', 'Léger', 'Joyeux'],
         ['Peu connu', 'Relativement connu', 'Populaire']]
-    anly = [True, True, True, True, False, True, False, False, True, False, True, True]
+    anly = [True, True, True, True, False, True, False, False, True, False, True, False]
     dict  = {'audio-features':feat, 'name':name, 'description':desc, 'intervals':inte, 'tags':tags, 'to analyse':anly}
     audio_feat = pd.DataFrame(dict).set_index('audio-features')
     return audio_feat
@@ -44,7 +44,7 @@ def tag(audio_feat, carac, moy):
     audio_feat : pd.Dataframe
     carac : string
     moy : float"""
-    if not audio_feat.loc[carac, "to analyse"] : return None
+    if audio_feat.loc[carac, "intervals"]==None : return None
     for i, seuil in enumerate(audio_feat.loc[carac, "intervals"]):
         if moy < seuil :
             return audio_feat.loc[carac, "tags"][i-1]
@@ -67,13 +67,16 @@ def gen_tags(audio_feat, playlist):
 
 
 def gen_hists(dataPL,liste_feat, tabTags):
-    for aud_feat in liste_feat:
+    for item in liste_feat:
         #On peut faire une boucle for pour afficher les graphs de tous les audiofeatures sélectionnés
         #Et faire des if pour afficher un type de graph différent selon l'audiofeature?
-        if aud_feat=='release_year':
+        if item=='Années de sortie':
             fig = px.histogram(dataPL, x='release_date')
             fig.update_layout(
-                title="Année de sortie",
+                title="Années de sortie",
+                xaxis_title = "Années de sortie",
+                yaxis_title = "Nombre de piste /période de temps",
+                bargap = 0.1
             )
             st.plotly_chart(fig)
         else:
@@ -83,12 +86,14 @@ def gen_hists(dataPL,liste_feat, tabTags):
             #     binsize, eten = 0.75, [0,1.]
             # fig = ff.create_distplot([dataPL[aud_feat]], [aud_feat], bin_size=binsize, show_rug=False)
             # fig.update_xaxes(range=eten)
+            aud_feat = item.lower()
             fig = px.histogram(dataPL, x=[aud_feat],
                 barmode='overlay',
                 opacity=0.5)
             fig.update_layout(
-                title = tabTags.loc[aud_feat, 'name'] + " : " + tabTags.loc[aud_feat, 'tag']
+                title = tabTags.loc[aud_feat, 'name'] + " : " + tabTags.loc[aud_feat, 'tag'],
+                xaxis_title = tabTags.loc[aud_feat, 'name'],
+                yaxis_title = 'Nombre de pistes',
+                bargap = 0.1
             )
-            fig.update_xaxes(title = tabTags.loc[aud_feat, 'name'])
-            fig.update_yaxes(title = 'Nombre de pistes')
             st.plotly_chart(fig)

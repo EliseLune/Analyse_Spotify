@@ -143,11 +143,11 @@ def analyse():
     tabTags = gen_tags(tabAF, dataPL)
     totTime = dataPL['length'].sum()//1000  # en secondes
     st.write('Nombre de pistes : {}'.format(dataPL.shape[0]))
-    st.write('Durée d\'écoute totale (de la playlist plutôt ?): {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
+    st.write('Durée d\'écoute de la playlist : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
     
-    st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
+    # st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
     
-    a=st.multiselect('Audio-Features',['acousticness','danceability','energy','instrumentalness','liveness','popularity','release_year','speechiness','valence'])
+    a=st.multiselect('Audio-Features',['Acousticness','Danceability','Energy','Instrumentalness','Liveness','Popularity','Années de sortie','Speechiness','Valence'])
     if crtPlaylist!='Select' and a!=[]:
         # test_plotly('df_example_01-Copy1.csv',a)
         gen_hists(dataPL, a, tabTags)
