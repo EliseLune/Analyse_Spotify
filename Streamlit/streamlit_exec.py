@@ -121,9 +121,11 @@ def apres_auth():
     st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')
 
     # Bubble chart des artistes
-    # tutu = getTrackIDs('4pUzBoCxZzig6QncK4fcxD',sp)
-    # df = creat_chart(tutu,sp)
+    tutu = getTrackIDs('4pUzBoCxZzig6QncK4fcxD',sp)
+    st.write(sp.track(tutu[0]))
+    df = creat_chart(tutu,sp)
     # st.dataframe(df)
+    st.write(df.to_html(escape=False), unsafe_allow_html=True)
     return None
 
 
@@ -143,7 +145,7 @@ def analyse():
     tabTags = gen_tags(tabAF, dataPL)
     totTime = dataPL['length'].sum()//1000  # en secondes
     st.write('Nombre de pistes : {}'.format(dataPL.shape[0]))
-    st.write('Durée d\'écoute de la playlist : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
+    st.write('Durée de la playlist : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
     
     # st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
     
@@ -206,6 +208,8 @@ def recommandation():
         
         #recommendation de playlist soufflée
         if recommandation_type=="Playlist soufflée":
+            st.subheader('Playlist soufflée')
+            st.write("Pour chaque morceau de la playlist, ce type de recommendation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
             st.subheader("Choississez des audiofeatures à garder similaires dans la nouvelle playlist")
             st.write("N'en choissiez pas trop, la recommendation serait bien plus compliquée !")
             audiofeatures_chosen=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','valence'])
@@ -221,9 +225,14 @@ def recommandation():
                 ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change)
 
         elif recommandation_type=="Recommandation par années":
+            st.subheader('Recommendation par années')
+            st.write("Chaque morceau de la playlist sera remplacé par un morceau paru autour de la date selectionnée avec des audiofeatures similaires")
             st.subheader("Choississez une année cible")
             year = st.text_input('Année choisie', value="1970")
-            nouvelle_playlist = recommendation_year(id_to_change,year,sp)
+            st.subheader("Choississez un delta d'années")
+            st.write("Par exemple, si vous sélectionner 1970 précédement et 5 ici, nous vous recommenderons des titres entre 1965 et 1975.")
+            delta = st.slider ("Delta d'années", min_value=0, max_value=10,value=5,step = 1)
+            nouvelle_playlist = recommendation_year(id_to_change,year,delta,sp)
             affichage_playlist_annees(nouvelle_playlist,sp)
             ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change)
         

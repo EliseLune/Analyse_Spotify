@@ -71,7 +71,7 @@ class C():
 
     def plot(self, ax):
         for i in range(self.N):
-            st.image(self.df['image'][i])
+            # st.image(self.df['image'][i])
             # image = plt.imread(self.df['image'][i])
             circ = plt.Circle(self.x[i,:2],self.x[i,2] )
             ax.add_patch(circ)
@@ -81,9 +81,7 @@ def creat_chart(all_tracks,sp):
     df = artist_dataframe(all_tracks,sp)
     # r = np.random.randint(5,15, size=10)
     r = df['number of tracks'].tolist()
-    st.dataframe(df)
     c = C(r,df)
-    st.write(c)
     fig, ax = plt.subplots(subplot_kw=dict(aspect="equal"))
     ax.axis("off")
 
